@@ -1,0 +1,44 @@
+{#
+    Title: Bookmark Index Template
+    Parameters:
+        - user: User
+        - bookmarks: list[Bookmark]
+#}
+
+{% extends "_base.html" %}
+
+{% block title %}Bookmarks{% endblock %}
+
+{% block main %}
+    <h1>Bookmarks</h1>
+    {% if user %}
+    <p class="add-button">
+        <a href="/add">Add Bookmark</a>
+    </p>
+    {% endif %}
+    {% if bookmarks|length > 0 %}
+    <table class="bookmark_table">
+        <tbody>
+            {% for bookmark in bookmarks %}
+            <tr>
+                <td>
+                    <a href="{{ bookmark.url }}">{{ bookmark.title }}</a>
+                </td>
+                <td>
+                    {% if bookmark.blurb %}
+                    {{ bookmark.blurb }}
+                    {% else %}
+                    <i>No blurb</i>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/{{ bookmark.id }}">Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p><i>Nothing to show here.</i></p>
+    {% endif %}
+{% endblock %}

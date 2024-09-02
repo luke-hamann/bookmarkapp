@@ -1,0 +1,15 @@
+{#
+    Parameters:
+        - user: User
+        - title: str
+        - message: str
+#}
+
+{% extends "_base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main%}
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+{% endblock %}

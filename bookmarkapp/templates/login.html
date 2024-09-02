@@ -1,0 +1,28 @@
+{#
+    Parameters:
+        - user: User
+        - return_url: str
+#}
+
+{% extends "_base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block main %}
+    <h1>Login</h1>
+    <form action="login" method="post" class="login_form">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="off" autofocus required />
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" />
+        <input type="hidden" name="return_url" value="{{ return_url }}" required />
+        {% if errors %}
+        <ul class="error_list">
+            {% for error in errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <button type="submit">Login</button>
+    </form>
+{% endblock %}

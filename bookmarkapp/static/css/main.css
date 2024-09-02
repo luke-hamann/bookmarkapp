@@ -1,0 +1,172 @@
+@charset 'utf-8';
+
+/* Page Layout */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    color-scheme: light dark;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    border-left: 1px solid;
+    border-right: 1px solid;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    max-width: 800px;
+    min-height: 100vh;
+}
+
+header, footer {
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+main {
+    flex-grow: 1;
+}
+
+/* Header */
+
+header {
+    border-bottom: 1px solid;
+}
+
+header nav ul {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+header a, header span {
+    display: block;
+    padding: 1rem;
+}
+
+header button {
+    display: block;
+    margin: 1rem;
+}
+
+/* Main */
+
+main h1 {
+    padding: 1rem;
+    text-align: center;
+}
+
+main p, main section {
+    padding: 1rem;
+}
+
+main ul {
+    padding: 1rem;
+    padding-left: 2rem;
+}
+
+/* Footer */
+
+footer {
+    border-top: 1px solid;
+    padding: 1rem;
+    text-align: center;
+}
+
+/* Bookmark Table */
+
+.bookmark_table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.bookmark_table td, .bookmark_table th {
+    border: 1px solid;
+    padding: 1rem;
+}
+
+@media (max-width: 30rem) {
+    .bookmark_table td {
+        display: block;
+    }
+
+    .bookmark_table td {
+        border: none;
+    }
+
+    .bookmark_table tr {
+        border: 1px solid;
+    }
+}
+
+/* Bookmark Description */
+
+.bookmark_description {
+    white-space: pre-line;
+}
+
+/* Bookmark Form */
+
+.bookmark_form input, .bookmark_form label, .bookmark_form textarea {
+    display: block;
+    margin: 1rem;
+    width: calc(100% - 2rem)
+}
+
+.bookmark_form textarea {
+    height: 10rem;
+    width: calc(100% - 2rem);
+    resize: vertical;
+}
+
+.bookmark_form_buttons {
+    margin: 1rem;
+    text-align: center;
+}
+
+.bookmark_form_buttons button, .bookmark_form_buttons a {
+    display: inline-block;
+    padding: 1rem;
+}
+
+/* Delete Form */
+
+.delete_form {
+    text-align: center;
+}
+
+/* Login Form */
+
+.login_form {
+    border: 1px solid;
+    max-width: 20rem;
+    margin: 0 auto 1rem;
+}
+
+.login_form input, .login_form label {
+    display: block;
+    margin: 1rem;
+    width: calc(100% - 2rem);
+}
+
+.login_form input {
+    padding: 1rem;
+}
+
+.login_form button {
+    display: block;
+    margin: 1rem auto;
+    padding: 1rem;
+}
+
+/* Error List */
+
+.error_list {
+    color: red;
+}

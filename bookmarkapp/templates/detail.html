@@ -1,0 +1,35 @@
+{#
+    Title: Bookmark Detail Template
+    Parameters:
+        - user: User
+        - bookmark: Bookmark
+#}
+
+{% extends "_base.html" %}
+
+{% block title %}{{ bookmark.title }}{% endblock %}
+
+{% block main %}
+    <h1>{{ bookmark.title }}</h1>
+    {% if user %}
+    <ul>
+        <li><a href="/{{ bookmark.id }}/edit">Edit</a></li>
+        <li><a href="/{{ bookmark.id }}/delete">Delete</a></li>
+    </ul>
+    {% endif %}
+    <p>
+        <a href="{{ bookmark.url }}">{{ bookmark.url }}</a>
+    </p>
+    <p>
+    {% if bookmark.blurb %}
+        {{ bookmark.blurb }}
+    {% else %}
+        <i>No blurb</i>
+    {% endif %}
+    </p>
+    {% if bookmark.description %}
+    <section class="bookmark_description">{{ bookmark.description }}</section>
+    {% else %}
+    <p><i>No description.</i></p>
+    {% endif %}
+{% endblock %}
