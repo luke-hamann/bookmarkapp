@@ -153,7 +153,7 @@ def login():
         username = request.form.get('username', None)
         password = request.form.get('password', None)
         return_url = request.form.get('return_url', '/')
-        if (not return_url.startswith('/')):
+        if (return_url.startswith('//') or not return_url.startswith('/')):
             return_url = '/'
 
         try:
