@@ -1,7 +1,8 @@
 from functools import wraps
-from flask import abort, redirect, render_template, request, session, url_for
-from bookmarkapp import app
+from flask import abort, Blueprint, redirect, render_template, request, session, url_for
 from bookmarkapp.models import Bookmark, Database, ExceptionList, User
+
+blueprint = Blueprint('controller', __name__, url_prefix='/')
 
 # Helper functions
 
@@ -36,7 +37,7 @@ def get_bookmark_from_form() -> Bookmark:
 
 # Readonly Views
 
-@app.route("/", methods=['GET'])
+@blueprint.route("/", methods=['GET'])
 def index():
     try:
         bookmarks = Database.get_all_bookmarks()
@@ -46,7 +47,7 @@ def index():
     return render_template("index.html", bookmarks=bookmarks, user=get_user(),
                            return_url="/")
 
-@app.route("/<int:id>", methods=['GET'])
+@blueprint.route("/<int:id>", methods=['GET'])
 def detail(id):
     try:
         bookmark = Database.get_bookmark(id)
@@ -61,7 +62,7 @@ def detail(id):
 
 # Form Views
 
-@app.route("/add", methods=["GET", "POST"])
+@blueprint.route("/add", methods=["GET", "POST"])
 @login_required
 def add():
     if request.method == "GET":
@@ -88,7 +89,7 @@ def add():
 
         return redirect(bookmark.id)
 
-@app.route("/<int:id>/edit", methods=["GET", "POST"])
+@blueprint.route("/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 def edit(id):
     if request.method == "GET":
@@ -118,7 +119,7 @@ def edit(id):
         
         return redirect(f'/{id}')
 
-@app.route("/<int:id>/delete", methods=["GET", "POST"])
+@blueprint.route("/<int:id>/delete", methods=["GET", "POST"])
 @login_required
 def delete(id):
     bookmark = Database.get_bookmark(id)
@@ -137,7 +138,7 @@ def delete(id):
 
 # Authentication
 
-@app.route("/login", methods=["GET", "POST"])
+@blueprint.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         return_url = request.args.get('return_url', '/')
@@ -164,7 +165,7 @@ def login():
         set_user(user)
         return redirect(return_url)
 
-@app.route("/logout", methods=["GET", "POST"])
+@blueprint.route("/logout", methods=["GET", "POST"])
 def logoff():
     if (request.method == 'GET'):
         return redirect('index')
@@ -174,13 +175,13 @@ def logoff():
 
 # Error Pages
 
-@app.errorhandler(404)
+@blueprint.errorhandler(404)
 def not_found(error):
     return render_template("error.html", user=get_user(),
                            title="404 Not Found",
                            message="That page does not exist."), 404
 
-@app.errorhandler(500)
+@blueprint.errorhandler(500)
 def server_error(error):
     return render_template("error.html", user=get_user(),
                            title="500 Server Error",
