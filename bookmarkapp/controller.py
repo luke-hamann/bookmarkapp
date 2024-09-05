@@ -1,23 +1,11 @@
 from functools import wraps
-from flask import abort, Blueprint, redirect, render_template, request, session, url_for
-from bookmarkapp.models import Bookmark, Database, ExceptionList, User
+from flask import abort, Blueprint, redirect, render_template, request, url_for
+from .models import Bookmark, Database, ExceptionList
+from .auth import get_user, set_user
 
 controller = Blueprint('controller', __name__, url_prefix='/')
 
 # Helper functions
-
-def get_user() -> User:
-    userId = session.get('userId', None)
-    if (userId is None):
-        return None
-    else:
-        return Database.get_user(userId)
-
-def set_user(user: User) -> None:
-    if (user is None):
-        session['userId'] = None
-    else:
-        session['userId'] = user.id
 
 def login_required(old_function):
     @wraps(old_function)
@@ -170,17 +158,3 @@ def logoff():
     if (request.method == 'POST'):
         set_user(None)
     return redirect(url_for('controller.index'))
-
-# Error Pages
-
-@controller.errorhandler(404)
-def not_found(error):
-    return render_template("error.html", user=get_user(),
-                           title="404 Not Found",
-                           message="That page does not exist."), 404
-
-@controller.errorhandler(500)
-def server_error(error):
-    return render_template("error.html", user=get_user(),
-                           title="500 Server Error",
-                           message="Something went wrong on our end."), 500
