@@ -1,123 +1,138 @@
-from pathlib import PurePath
 import sqlite3
 from bookmarkapp.models import Bookmark, ExceptionList, User
 
 class Database:
-    _DATABASE_FILE = PurePath('bookmarkapp', 'data', 'database.db')
+    _DATABASE_PATH = 'bookmarkapp/data/database.db'
 
-    def _get_cursor() -> sqlite3.Cursor:
-        connection = sqlite3.connect(Database._DATABASE_FILE)
-        cursor = connection.cursor()
-        return cursor
-    
-    def get_all_bookmarks() -> list[Bookmark]:
+    @classmethod
+    def _get_cursor(cls) -> sqlite3.Cursor:
+        return sqlite3.connect(cls._DATABASE_PATH).cursor()
+
+    @classmethod
+    def get_all_bookmarks(cls) -> list[Bookmark]:
         try:
-            result = Database._get_cursor().execute("""
-                SELECT id, title, url, blurb, description
-                FROM bookmarks
-                ORDER BY LOWER(title);
-            """)
-            rows = result.fetchall()
-        except:
-            raise ExceptionList(["There was an error connecting to the database."])
-        
+            cursor = cls._get_cursor()
+            cursor.execute("""
+                           SELECT id, title, url, blurb, description
+                           FROM bookmarks
+                           ORDER BY LOWER(title);
+                           """)
+            rows = cursor.fetchall()
+        except sqlite3.Error as e:
+            raise ExceptionList([f'Database error occured: {str(e)}'])
+        finally:
+            cursor.connection.close()
+
         bookmarks = []
         for row in rows:
-            [id, title, url, blurb, description] = row
-            bookmark = Bookmark(id, title, url, blurb, description)
-            bookmarks.append(bookmark)
+            bookmarks.append(Bookmark(*row))
         return bookmarks
 
-    def get_bookmark(id: int) -> Bookmark:
+    @classmethod
+    def get_bookmark(cls, id: int) -> Bookmark: 
         try:
-            result = Database._get_cursor().execute("""
-                SELECT title, url, blurb, description
-                FROM bookmarks
-                WHERE id = ?;
-            """, (id, ))
-            row = result.fetchone()
-        except:
-            raise ExceptionList(["There was an error connecting to the database."])
+            cursor = cls._get_cursor()
+            cursor.execute("""
+                           SELECT id, title, url, blurb, description
+                           FROM bookmarks
+                           WHERE id = ?;
+                           """, (id, ))
+            row = cursor.fetchone()
+        except sqlite3.Error as e:
+            raise ExceptionList([f'Database error occured: {str(e)}'])
+        finally:
+            cursor.connection.close()
         
         if (row is None):
-            return None
+            raise ExceptionList(['That bookmark does not exist.'])
         
-        [title, url, blurb, description] = row
-        return Bookmark(id, title, url, blurb, description)
-
-    def add_bookmark(bookmark: Bookmark, user: User) -> Bookmark:
+        return Bookmark(*row)
+    
+    @classmethod
+    def add_bookmark(cls, bookmark: Bookmark, user: User) -> Bookmark:
         if (user is None):
-            raise ExceptionList(["Authentication is required to add a bookmark."])
-        
-        bookmark_errors = bookmark.get_errors()
-        if (len(bookmark_errors) > 0):
-            raise ExceptionList(bookmark_errors)
-        
+            raise ExceptionList(['Authentication is required to add a bookmark.'])
+
+        errors = bookmark.get_errors()
+        if (len(errors) > 0):
+            raise ExceptionList(errors)
+
         try:
-            cursor = Database._get_cursor()
+            cursor = cls._get_cursor()
+            b = bookmark
             cursor.execute("""
-                INSERT INTO bookmarks (title, url, blurb, description)
-                VALUES (?, ?, ?, ?);
-            """, (bookmark.title, bookmark.url, bookmark.blurb, bookmark.description))
-            cursor.connection.commit()
+                           INSERT INTO bookmarks (title, url, blurb, description)
+                           VALUES (?, ?, ?, ?);
+                           """, (b.title, b.url, b.blurb, b.description))
             id = cursor.lastrowid
-        except:
-            raise ExceptionList(["There was an error connecting to the database."])
-        
+            cursor.connection.commit()
+        except sqlite3.Error as e:
+            raise ExceptionList([f'Database error occured: {str(e)}'])
+        finally:
+            cursor.connection.close()
+
         bookmark.id = id
         return bookmark
 
-    def update_bookmark(bookmark: Bookmark, user: User) -> None:
+    @classmethod
+    def update_bookmark(cls, bookmark: Bookmark, user: User) -> None:
         if (user is None):
-            raise ExceptionList(["Authentication is required to update a bookmark."])
-        
-        bookmark_errors = bookmark.get_errors()
-        if (len(bookmark_errors) > 0):
-            raise ExceptionList(bookmark_errors)
-        
-        try:
-            cursor = Database._get_cursor()
-            cursor.execute("""
-                UPDATE bookmarks
-                SET title = ?,
-                    url = ?,
-                    blurb = ?,
-                    description = ?
-                WHERE id = ?;
-            """, (bookmark.title, bookmark.url, bookmark.blurb, bookmark.description, bookmark.id))
-            cursor.connection.commit()
-            if (cursor.rowcount == 0):
-                raise ExceptionList(["That bookmark does not exist."])
-        except ExceptionList as ex:
-            raise ex
-        except:
-            raise ExceptionList(["There was an error connecting to the database."])
+            raise ExceptionList(['Authentication is required to update a bookmark.'])
 
-    def delete_bookmark(bookmark: Bookmark, user: User) -> None:
-        if (user is None):
-            raise ExceptionList(["Authentication is required to delete a bookmark."])
+        errors = bookmark.get_errors()
+        if (len(errors) > 0):
+            raise ExceptionList(errors)
 
         try:
-            cursor = Database._get_cursor()
+            cursor = cls._get_cursor()
+            b = bookmark
             cursor.execute("""
-                DELETE FROM bookmarks
-                WHERE id = ?;
-            """, (bookmark.id, ))
+                           UPDATE bookmarks
+                           SET title = ?, url = ?, blurb = ?, description = ?
+                           WHERE id = ?;
+                           """, (b.title, b.url, b.blurb, b.description, b.id))
+            row_count = cursor.rowcount
             cursor.connection.commit()
-            if (cursor.rowcount == 0):
-                raise ExceptionList(["That bookmark does not exist."])
-        except ExceptionList as ex:
-            raise ex
-        except:
-            raise ExceptionList(["There was an error connecting to the database."])
+        except sqlite3.Error as e:
+            raise ExceptionList([f'Database error occured: {str(e)}'])
+        finally:
+            cursor.connection.close()
 
-    def get_user(id: int) -> User:
+        if (row_count == 0):
+            raise ExceptionList(['That bookmark does not exist.'])
+        
+        return bookmark
+
+    @classmethod
+    def delete_bookmark(cls, bookmark: Bookmark, user: User) -> None:
+        if (user is None):
+            raise ExceptionList(['Authentication is required to delete a bookmark.'])
+
+        try:
+            cursor = cls._get_cursor()
+            cursor.execute("""
+                           DELETE FROM bookmarks
+                           WHERE id = ?
+                           """, (bookmark.id, ))
+            row_count = cursor.rowcount
+            cursor.connection.commit()
+        except sqlite3.Error as e:
+            raise ExceptionList([f'Database error occured: {str(e)}'])
+        finally:
+            cursor.connection.close()
+
+        if (row_count == 0):
+            raise ExceptionList(['That bookmark does not exist.'])
+
+    @classmethod
+    def get_user(cls, id: int) -> User:
         if (id == 1):
-            return User(1, 'admin', 'Administrator')
+            return User(1, 'a_user', 'Administrator')
         else:
-            raise ExceptionList(["That user does not exist."])
+            raise ExceptionList(['That user does not exist.'])
 
-    def authenticate_user(username: str, password: str) -> User:
+    @classmethod
+    def authenticate_user(cls, username: str, password: str) -> User:
         errors = []
         if (username == ''):
             errors.append('Username is required.')
@@ -127,7 +142,7 @@ class Database:
         if (len(errors) > 0):
             raise ExceptionList(errors)
 
-        if ((username == 'admin') and (password == 'password')):
-            return User(1, 'admin', 'Administrator')
+        if ((username == 'a_user') and (password == 'pw2acct')) :
+            return User(1, 'a_user', 'Administrator')
         else:
-            raise ExceptionList(["Invalid credentials."])
+            raise ExceptionList(['Invalid credentials.'])
