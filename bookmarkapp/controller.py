@@ -2,20 +2,20 @@ from functools import wraps
 from flask import abort, Blueprint, redirect, render_template, request, session, url_for
 from bookmarkapp.models import Bookmark, Database, ExceptionList, User
 
-blueprint = Blueprint('controller', __name__, url_prefix='/')
+controller = Blueprint('controller', __name__, url_prefix='/')
 
 # Helper functions
 
 def get_user() -> User:
     userId = session.get('userId', None)
-    if userId is None:
+    if (userId is None):
         return None
     else:
         return Database.get_user(userId)
 
 def set_user(user: User) -> None:
-    if user is None:
-        session.pop('userId')
+    if (user is None):
+        session['userId'] = None
     else:
         session['userId'] = user.id
 
@@ -37,7 +37,7 @@ def get_bookmark_from_form() -> Bookmark:
 
 # Readonly Views
 
-@blueprint.route("/", methods=['GET'])
+@controller.route("/", methods=['GET'])
 def index():
     try:
         bookmarks = Database.get_all_bookmarks()
@@ -47,7 +47,7 @@ def index():
     return render_template("index.html", bookmarks=bookmarks, user=get_user(),
                            return_url="/")
 
-@blueprint.route("/<int:id>", methods=['GET'])
+@controller.route("/<int:id>", methods=['GET'])
 def detail(id):
     try:
         bookmark = Database.get_bookmark(id)
@@ -62,7 +62,7 @@ def detail(id):
 
 # Form Views
 
-@blueprint.route("/add", methods=["GET", "POST"])
+@controller.route("/add", methods=["GET", "POST"])
 @login_required
 def add():
     if request.method == "GET":
@@ -89,7 +89,7 @@ def add():
 
         return redirect(bookmark.id)
 
-@blueprint.route("/<int:id>/edit", methods=["GET", "POST"])
+@controller.route("/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 def edit(id):
     if request.method == "GET":
@@ -119,7 +119,7 @@ def edit(id):
         
         return redirect(f'/{id}')
 
-@blueprint.route("/<int:id>/delete", methods=["GET", "POST"])
+@controller.route("/<int:id>/delete", methods=["GET", "POST"])
 @login_required
 def delete(id):
     bookmark = Database.get_bookmark(id)
@@ -134,11 +134,11 @@ def delete(id):
     
     Database.delete_bookmark(bookmark, get_user())
 
-    return redirect(url_for('index'))
+    return redirect(url_for('controller.index'))
 
 # Authentication
 
-@blueprint.route("/login", methods=["GET", "POST"])
+@controller.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         return_url = request.args.get('return_url', '/')
@@ -165,23 +165,21 @@ def login():
         set_user(user)
         return redirect(return_url)
 
-@blueprint.route("/logout", methods=["GET", "POST"])
+@controller.route("/logout", methods=["GET", "POST"])
 def logoff():
-    if (request.method == 'GET'):
-        return redirect('index')
-    else:
+    if (request.method == 'POST'):
         set_user(None)
-        return redirect(url_for('index'))
+    return redirect(url_for('controller.index'))
 
 # Error Pages
 
-@blueprint.errorhandler(404)
+@controller.errorhandler(404)
 def not_found(error):
     return render_template("error.html", user=get_user(),
                            title="404 Not Found",
                            message="That page does not exist."), 404
 
-@blueprint.errorhandler(500)
+@controller.errorhandler(500)
 def server_error(error):
     return render_template("error.html", user=get_user(),
                            title="500 Server Error",
