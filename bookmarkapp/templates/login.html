@@ -12,10 +12,10 @@
     <h1>Login</h1>
     <form action="login" method="post" class="login_form">
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" autocomplete="off" autofocus required />
+        <input type="text" id="username" name="username" autocomplete="off" autofocus />
         <label for="password">Password</label>
         <input type="password" id="password" name="password" />
-        <input type="hidden" name="return_url" value="{{ return_url }}" required />
+        <input type="hidden" name="return_url" value="{{ return_url }}" />
         {% if errors %}
         <ul class="error_list">
             {% for error in errors %}
