@@ -27,7 +27,7 @@
                 </li>
                 <li><span>{{ user.display_name }}</span></li>
                 {% else %}
-                <li><a href="/login?return_url={{ return_url }}">Login</a></li>
+                <li><a href="/login{% if return_url %}?return_url={{ return_url }}{% endif %}">Login</a></li>
                 {% endif %}
             </ul>
         </nav>
