@@ -148,7 +148,8 @@ def login():
         try:
             user = Database.authenticate_user(username, password)
         except ExceptionList as e:
-            return render_template("login.html", errors=e.error_list, return_url=return_url)
+            return render_template("login.html", errors=e.error_list,
+                                   return_url=return_url, username=username)
 
         set_user(user)
         return redirect(return_url)
