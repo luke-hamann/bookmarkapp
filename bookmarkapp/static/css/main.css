@@ -14,8 +14,6 @@
 }
 
 body {
-    border-left: 1px solid;
-    border-right: 1px solid;
     display: flex;
     flex-direction: column;
     margin: 0 auto;
@@ -75,6 +73,7 @@ main ul {
 
 footer {
     border-top: 1px solid;
+    margin-top: 1rem;
     padding: 1rem;
     text-align: center;
 }
