@@ -154,7 +154,7 @@ def login():
         return redirect(return_url)
 
 @controller.route("/logout", methods=["GET", "POST"])
-def logoff():
+def logout():
     if (request.method == 'POST'):
         set_user(None)
     return redirect(url_for('controller.index'))
