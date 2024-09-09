@@ -1,0 +1,35 @@
+{#
+    Title: Edit Bookmark Template
+    Parameters:
+        - user: User
+        - bookmark: Bookmark
+#}
+
+{% extends "_base.html" %}
+
+{% block title %}Edit Bookmark{% endblock %}
+
+{% block main %}
+    <h1>Edit Bookmark</h1>
+    {% if errors %}
+    <ul class="error_list">
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <form action="edit" method="post" class="bookmark_form">
+        <label for="title">Title*</label>
+        <input type="text" name="title" id="title" value="{{ bookmark.title }}" autofocus />
+        <label for="url">URL*</label>
+        <input type="text" name="url" id="url" value="{{ bookmark.url }}" />
+        <label for="blurb">Blurb</label>
+        <input type="text" name="blurb" id="blurb" value="{{ bookmark.blurb }}" />
+        <label for="description">Description</label>
+        <textarea name="description" id="description">{{ bookmark.description }}</textarea>
+        <div class="bookmark_form_buttons">
+            <button type="submit">Save</button>
+            <a href="/{{ bookmark.id }}">Cancel</a>
+        </div>
+    </form>
+{% endblock %}

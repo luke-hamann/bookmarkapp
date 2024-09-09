@@ -1,7 +1,5 @@
 import sqlite3
-from bookmarkapp.models.bookmark import Bookmark
-from bookmarkapp.models.exceptionlist import ExceptionList
-from bookmarkapp.models.user import User
+from bookmarkapp.models import Bookmark, ExceptionList, User
 
 class Database:
     _DATABASE_PATH = 'bookmarkapp/data/database.db'
