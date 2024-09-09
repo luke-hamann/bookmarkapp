@@ -1,12 +1,16 @@
-import secrets
+import tomllib
 from flask import Flask, render_template
 from .auth import get_user
 from .controller import controller
 
 app = Flask("bookmarkapp")
-app.config.update(
-    SECRET_KEY=secrets.token_hex()
-)
+
+try:
+    app.config.from_file('../config.toml', load=tomllib.load, text=False)
+except FileNotFoundError:
+    print('config.toml not found.')
+    exit()
+
 app.register_blueprint(controller)
 
 @app.errorhandler(404)
