@@ -1,3 +1,10 @@
+"""
+    Title: Database Class
+    Properties: None
+    Methods: get_all_bookmarks, get_bookmark, add_bookmark, update_bookmark,
+             delete_bookmark, get_user, authenticate_user
+"""
+
 import sqlite3
 from bookmarkapp.models import Bookmark, ExceptionList, User
 
@@ -49,7 +56,7 @@ class Database:
         return Bookmark(*row)
     
     @classmethod
-    def add_bookmark(cls, bookmark: Bookmark, user: User) -> Bookmark:
+    def add_bookmark(cls, bookmark: Bookmark, user: User) -> int:
         if (user is None):
             raise ExceptionList(['Authentication is required to add a bookmark.'])
 
@@ -71,8 +78,7 @@ class Database:
         finally:
             cursor.connection.close()
 
-        bookmark.id = id
-        return bookmark
+        return id
 
     @classmethod
     def update_bookmark(cls, bookmark: Bookmark, user: User) -> None:
@@ -100,8 +106,6 @@ class Database:
 
         if (row_count == 0):
             raise ExceptionList(['That bookmark does not exist.'])
-        
-        return bookmark
 
     @classmethod
     def delete_bookmark(cls, bookmark: Bookmark, user: User) -> None:
@@ -112,7 +116,7 @@ class Database:
             cursor = cls._get_cursor()
             cursor.execute("""
                            DELETE FROM bookmarks
-                           WHERE id = ?
+                           WHERE id = ?;
                            """, (bookmark.id, ))
             row_count = cursor.rowcount
             cursor.connection.commit()

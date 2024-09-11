@@ -1,8 +1,9 @@
 {#
-    Title: Delete Bookmark Template
+    Title: Delete Bookmark Form Template
     Parameters:
-        - user: User
         - bookmark: Bookmark
+        - return_url: str
+        - user: User
 #}
 
 {% extends "_base.html" %}
@@ -10,7 +11,7 @@
 {% block title %}Confirm Delete{% endblock %}
 
 {% block main %}
-    <h1>Confirm</h1>
+    <h1>Confirm Delete</h1>
     <form action="/{{ bookmark.id }}/delete" method="post" class="delete_form">
         <p>Are you sure you want to delete "{{ bookmark.title }}"?</p>
         <div class="bookmark_form_buttons">

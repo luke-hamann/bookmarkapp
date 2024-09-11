@@ -1,3 +1,8 @@
+"""
+    Title: Authentication Helper Fuctions
+    Purpose: Provide an interface for saving and loading a user in a Flask session
+"""
+
 from flask import session
 from bookmarkapp.models import User, Database
 

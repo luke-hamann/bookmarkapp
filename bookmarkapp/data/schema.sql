@@ -1,3 +1,8 @@
+/*
+	Title: Schema
+	Purpose: Create the Bookmarks table
+*/
+
 CREATE TABLE "bookmarks" (
 	"id"	INTEGER,
 	"title"	TEXT NOT NULL,

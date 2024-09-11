@@ -1,10 +1,16 @@
+"""
+    Title: Bookmark Class
+    Properties: id, title, url, blurb, description
+    Methods: get_errors
+"""
+
 class Bookmark:
     _TITLE_MAX_LENGTH = 70
     _URL_MAX_LENGTH = 1_000
     _BLURB_MAX_LENGTH = 100
     _DESCRIPTION_MAX_LENGTH = 1_000_000
 
-    def __init__(self, id: int = 1, title: str = '', url: str = '', blurb: str = '', description: str = ''):
+    def __init__(self, id: int = 1, title: str = '', url: str = '', blurb: str = '', description: str = '') -> None:
         self.id = id
         self.title = title
         self.url = url
