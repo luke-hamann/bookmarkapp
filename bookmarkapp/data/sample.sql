@@ -1,5 +1,6 @@
 /*
-    Purpose: Inserts 5 rows of sample data into the Bookmarks table
+    Title: Sample Data
+    Purpose: Insert 5 rows of sample data into the Bookmarks table
 */
 
 INSERT INTO bookmarks (title, url, blurb, description)

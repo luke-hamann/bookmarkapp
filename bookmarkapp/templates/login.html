@@ -1,7 +1,10 @@
 {#
+    Title: Login Form Template
     Parameters:
-        - user: User
+        - errors: list[str]
         - return_url: str
+        - user: User
+        - username: str
 #}
 
 {% extends "_base.html" %}
@@ -10,12 +13,12 @@
 
 {% block main %}
     <h1>Login</h1>
-    <form action="login" method="post" class="login_form">
+    <form action="/login" method="post" class="login_form">
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" autocomplete="off"
+        <input type="text" name="username" id="username" autocomplete="off"
             value="{{ username }}" {% if not username %}autofocus {% endif %}/>
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" {% if username %}autofocus {% endif %}/>
+        <input type="password" name="password" id="password" {% if username %}autofocus {% endif %}/>
         <input type="hidden" name="return_url" value="{{ return_url }}" />
         {% if errors %}
         <ul class="error_list">

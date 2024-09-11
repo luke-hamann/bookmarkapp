@@ -1,8 +1,9 @@
 {#
     Title: Bookmark Detail Template
     Parameters:
-        - user: User
         - bookmark: Bookmark
+        - return_url: str
+        - user: User
 #}
 
 {% extends "_base.html" %}
@@ -17,9 +18,7 @@
         <li><a href="/{{ bookmark.id }}/delete">Delete</a></li>
     </ul>
     {% endif %}
-    <p>
-        <a href="{{ bookmark.url }}">{{ bookmark.url }}</a>
-    </p>
+    <p><a href="{{ bookmark.url }}">{{ bookmark.url }}</a></p>
     <p>
     {% if bookmark.blurb %}
         {{ bookmark.blurb }}
@@ -28,8 +27,8 @@
     {% endif %}
     </p>
     {% if bookmark.description %}
-    <section class="bookmark_description">{{ bookmark.description }}</section>
+    <p class="bookmark_description">{{ bookmark.description }}</p>
     {% else %}
-    <p><i>No description.</i></p>
+    <p><i>No description</i></p>
     {% endif %}
 {% endblock %}

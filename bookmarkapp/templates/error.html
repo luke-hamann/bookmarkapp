@@ -1,15 +1,17 @@
 {#
+    Title: Error Template
     Parameters:
-        - user: User
-        - title: str
         - message: str
+        - return_url: str
+        - title: str
+        - user: User
 #}
 
 {% extends "_base.html" %}
 
 {% block title %}{{ title }}{% endblock %}
 
-{% block main%}
+{% block main %}
     <h1>{{ title }}</h1>
     <p>{{ message }}</p>
 {% endblock %}

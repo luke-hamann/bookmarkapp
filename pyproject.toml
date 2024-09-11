@@ -1,7 +1,7 @@
 [project]
 name = "bookmarkapp"
 version = "1.0"
-description = "A web app for managing bookmarks"
+description = "A web application for managing bookmarks"
 dependencies = [
     "flask",
 ]

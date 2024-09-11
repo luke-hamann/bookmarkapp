@@ -1,8 +1,9 @@
 {#
     Title: Bookmark Index Template
     Parameters:
-        - user: User
         - bookmarks: list[Bookmark]
+        - return_url: str
+        - user: User
 #}
 
 {% extends "_base.html" %}
@@ -12,9 +13,7 @@
 {% block main %}
     <h1>Bookmarks</h1>
     {% if user %}
-    <p class="add-button">
-        <a href="/add">Add Bookmark</a>
-    </p>
+    <p><a href="/add">Add Bookmark</a></p>
     {% endif %}
     {% if bookmarks|length > 0 %}
     <table class="bookmark_table">
@@ -39,6 +38,6 @@
         </tbody>
     </table>
     {% else %}
-    <p><i>Nothing to show here.</i></p>
+    <p><i>Nothing to show here</i></p>
     {% endif %}
 {% endblock %}

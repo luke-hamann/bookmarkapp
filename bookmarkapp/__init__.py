@@ -1,7 +1,12 @@
+"""
+    Title: Application Initializer
+    Purpose: Create and configure the application object for Flask
+"""
+
 import tomllib
 from flask import Flask, render_template
-from .auth import get_user
-from .controller import controller
+from bookmarkapp.auth import get_user
+from bookmarkapp.controller import controller
 
 app = Flask("bookmarkapp")
 
@@ -20,7 +25,7 @@ def not_found(error):
                            message="That page does not exist."), 404
 
 @app.errorhandler(500)
-def server_error(error):
+def internal_server_error(error):
     return render_template("error.html", user=get_user(),
-                           title="500 Server Error",
+                           title="500 Internal Server Error",
                            message="Something went wrong on our end."), 500
