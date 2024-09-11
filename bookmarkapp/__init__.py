@@ -3,15 +3,19 @@
     Purpose: Create and configure the application object for Flask
 """
 
-import secrets
+import tomllib
 from flask import Flask, render_template
 from bookmarkapp.auth import get_user
 from bookmarkapp.controller import controller
 
 app = Flask("bookmarkapp")
-app.config.update(
-    SECRET_KEY=secrets.token_hex()
-)
+
+try:
+    app.config.from_file('../config.toml', load=tomllib.load, text=False)
+except FileNotFoundError:
+    print('config.toml not found.')
+    exit()
+
 app.register_blueprint(controller)
 
 @app.errorhandler(404)
