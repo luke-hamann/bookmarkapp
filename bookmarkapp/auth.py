@@ -1,8 +1,10 @@
 """
     Title: Authentication Helper Fuctions
-    Purpose: Provide an interface for saving and loading a user in a Flask session
+    Purpose: Provide an interface for accessing a user and a CSRF token in a
+             Flask session
 """
 
+from secrets import token_hex
 from flask import session
 from bookmarkapp.models import User, Database
 
@@ -18,3 +20,8 @@ def set_user(user: User) -> None:
         session['userId'] = None
     else:
         session['userId'] = user.id
+
+def get_csrf_token() -> str:
+    if (session.get('csrf_token', None) is None):
+        session.set('csrf_token', token_hex(256))
+    return session['csrf_token']

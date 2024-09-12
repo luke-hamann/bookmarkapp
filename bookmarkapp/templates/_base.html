@@ -2,6 +2,7 @@
     Title: Base Template
     Blocks: title, main
     Parameters:
+        - csrf_token: str
         - return_url: str
         - user: User
 #}
@@ -22,6 +23,8 @@
                 {% if user %}
                 <li>
                     <form action="/logout" method="post">
+                        <input type="hidden" name="csrf_token"
+                            value="{{ csrf_token }}" />
                         <button type="submit">Logout</button>
                     </form>
                 </li>
