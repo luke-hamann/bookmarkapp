@@ -5,21 +5,12 @@
 
 from functools import wraps
 from flask import abort, Blueprint, redirect, render_template, request, url_for
-from bookmarkapp.auth import get_user, set_user
+from bookmarkapp.auth import get_user, set_user, get_csrf_token
 from bookmarkapp.models import Bookmark, Database, ExceptionList
 
 controller = Blueprint('controller', __name__, url_prefix='/')
 
 # Helper functions
-
-def login_required(old_function):
-    @wraps(old_function)
-    def new_function(*args, **kwargs):
-        if (get_user() is None):
-            return redirect(f"/login?return_url={request.path}")
-        return old_function(*args, **kwargs)
-    
-    return new_function
 
 def get_bookmark_from_form() -> Bookmark:
     title = request.form.get('title', '').strip()
@@ -33,6 +24,27 @@ def validate_return_url(return_url):
         return_url = "/"
     return return_url
 
+# View wrappers
+
+def login_required(old_function):
+    @wraps(old_function)
+    def new_function(*args, **kwargs):
+        if (get_user() is None):
+            return redirect(f"/login?return_url={request.path}")
+        return old_function(*args, **kwargs)
+    
+    return new_function
+
+def csrf_protected(old_function):
+    @wraps(old_function)
+    def new_function(*args, **kwargs):
+        if ((request.method == "POST") and
+            (request.form.get('csrf_token', None) != get_csrf_token())):
+            abort(401)
+        return old_function(*args, **kwargs)
+
+    return new_function
+
 # Read-Only Views
 
 @controller.route("/", methods=['GET'])
@@ -43,7 +55,7 @@ def index():
         abort(500)
 
     return render_template("index.html", bookmarks=bookmarks, user=get_user(),
-                           return_url="/")
+                           return_url="/", csrf_token=get_csrf_token())
 
 @controller.route("/<int:id>", methods=['GET'])
 def detail(id):
@@ -55,16 +67,19 @@ def detail(id):
         abort(500)
 
     return render_template("detail.html", bookmark=bookmark,
-                           return_url=request.path, user=get_user())
+                           return_url=request.path, user=get_user(),
+                           csrf_token=get_csrf_token())
 
 # Form Views
 
 @controller.route("/add", methods=["GET", "POST"])
 @login_required
+@csrf_protected
 def add():
     if (request.method == "GET"):
         return render_template('add.html', bookmark=None, user=get_user(),
-                               return_url=request.path)
+                               return_url=request.path,
+                               csrf_token=get_csrf_token())
     else:
         try:
             bookmark = get_bookmark_from_form()
@@ -72,12 +87,14 @@ def add():
         except ExceptionList as e:
             return render_template('add.html', bookmark=bookmark,
                                    errors=e.error_list, user=get_user(),
-                                   return_url=request.path)
+                                   return_url=request.path,
+                                   csrf_token=get_csrf_token())
 
         return redirect(id)
 
 @controller.route("/<int:id>/edit", methods=["GET", "POST"])
 @login_required
+@csrf_protected
 def edit(id):
     if (request.method == "GET"):
         try:
@@ -87,7 +104,8 @@ def edit(id):
         except:
             abort(500)
 
-        return render_template('edit.html', bookmark=bookmark, user=get_user())
+        return render_template('edit.html', bookmark=bookmark, user=get_user(),
+                               csrf_token=get_csrf_token())
     else:
         bookmark = get_bookmark_from_form()
         bookmark.id = id
@@ -96,12 +114,14 @@ def edit(id):
             Database.update_bookmark(bookmark, get_user())
         except ExceptionList as e:
             return render_template('edit.html', bookmark=bookmark,
-                                   errors=e.error_list, user=get_user())
+                                   errors=e.error_list, user=get_user(),
+                                   csrf_token=get_csrf_token())
         
         return redirect(f'/{id}')
 
 @controller.route("/<int:id>/delete", methods=["GET", "POST"])
 @login_required
+@csrf_protected
 def delete(id):
     try:
         bookmark = Database.get_bookmark(id)
@@ -112,26 +132,30 @@ def delete(id):
 
     if (request.method == 'GET'):
         return render_template('delete.html', bookmark=bookmark,
-                               user=get_user())
+                               user=get_user(),
+                               csrf_token=get_csrf_token())
     else:
         try:
             Database.delete_bookmark(bookmark, get_user())
         except ExceptionList as e:
             return render_template('delete.html', bookmark=bookmark,
-                                   user=get_user())
+                                   user=get_user(),
+                                   csrf_token=get_csrf_token())
 
         return redirect('/')
 
 # Authentication
 
 @controller.route("/login", methods=["GET", "POST"])
+@csrf_protected
 def login():
     if (request.method == 'GET'):
         return_url = request.args.get('return_url', '/')
         return_url = validate_return_url(return_url)
 
         if (get_user() is None):
-            return render_template("login.html", return_url=return_url)
+            return render_template("login.html", return_url=return_url,
+                                   csrf_token=get_csrf_token())
         else:
             return redirect(return_url)
         
@@ -145,12 +169,14 @@ def login():
             user = Database.authenticate_user(username, password)
         except ExceptionList as e:
             return render_template("login.html", errors=e.error_list,
-                                   return_url=return_url, username=username)
+                                   return_url=return_url, username=username,
+                                   csrf_token=get_csrf_token())
 
         set_user(user)
         return redirect(return_url)
 
 @controller.route("/logout", methods=["GET", "POST"])
+@csrf_protected
 def logout():
     if (request.method == 'POST'):
         set_user(None)

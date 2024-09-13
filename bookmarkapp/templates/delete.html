@@ -2,6 +2,7 @@
     Title: Delete Bookmark Form Template
     Parameters:
         - bookmark: Bookmark
+        - csrf_token: str
         - return_url: str
         - user: User
 #}
@@ -14,6 +15,7 @@
     <h1>Confirm Delete</h1>
     <form action="/{{ bookmark.id }}/delete" method="post" class="delete_form">
         <p>Are you sure you want to delete "{{ bookmark.title }}"?</p>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="bookmark_form_buttons">
             <button type="submit">Yes</button>
             <a href="/{{ bookmark.id }}">Cancel</a>
