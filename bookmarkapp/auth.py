@@ -23,5 +23,5 @@ def set_user(user: User) -> None:
 
 def get_csrf_token() -> str:
     if (session.get('csrf_token', None) is None):
-        session.set('csrf_token', token_hex(256))
+        session['csrf_token'] = token_hex(256)
     return session['csrf_token']
