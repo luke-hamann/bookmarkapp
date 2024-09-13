@@ -137,7 +137,7 @@ def login():
         
     else:
         username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
+        password = request.form.get('password', '').strip()
         return_url = request.form.get('return_url', '/')
         return_url = validate_return_url(return_url)
 
