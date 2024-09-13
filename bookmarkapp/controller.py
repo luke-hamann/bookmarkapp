@@ -155,3 +155,18 @@ def logout():
     if (request.method == 'POST'):
         set_user(None)
     return redirect(url_for('controller.index'))
+
+
+# ----------------------------------------------ADDITION TO PROG----------------------------------------------
+# USERS LIST VIEW METHOD
+@controller.route("/users", methods=['POST'])
+def users_db(id):
+    try:
+        users = Database.get_all_users
+    except ExceptionList:
+        abort(404)
+    except:
+        abort(500)
+
+    return render_template("users.html", users = users,
+                           return_url=request.path)

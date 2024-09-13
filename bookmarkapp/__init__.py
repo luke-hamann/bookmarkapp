@@ -11,7 +11,8 @@ from bookmarkapp.controller import controller
 app = Flask("bookmarkapp")
 
 try:
-    app.config.from_file('../config.toml', load=tomllib.load, text=False)
+    with open('config.toml', 'rb') as f:
+        app.config.update(tomllib.load(f))
 except FileNotFoundError:
     print('config.toml not found.')
     exit()

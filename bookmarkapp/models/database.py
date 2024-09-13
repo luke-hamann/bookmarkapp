@@ -150,3 +150,25 @@ class Database:
             return User(1, 'a_user', 'Administrator')
         else:
             raise ExceptionList(['Invalid credentials.'])
+
+
+
+    @classmethod
+    def get_all_users_for_table() -> list[User]:
+        try:
+            cursor = cls._get_cursor()
+            cursor.execute("""
+                            SELECT id, display_name, privilege
+	                        FROM users
+	                        ORDER BY LOWER(privilege), LOWER(user_name);
+                           """)
+            rows = cursor.fetchall()
+        except sqlite3.Error as e:
+            raise ExceptionList([f'Database error occured: {str(e)}'])
+        finally:
+            cursor.connection.close()
+
+        users = []
+        for row in rows:
+            bookmarks.append(User(user[0], "", user[1], "", user_name[2] ))
+        return users

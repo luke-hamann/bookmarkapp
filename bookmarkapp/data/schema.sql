@@ -1,8 +1,3 @@
-/*
-	Title: Schema
-	Purpose: Create the Bookmarks table
-*/
-
 CREATE TABLE "bookmarks" (
 	"id"	INTEGER,
 	"title"	TEXT NOT NULL,
@@ -10,4 +5,15 @@ CREATE TABLE "bookmarks" (
 	"blurb"	TEXT,
 	"description"	TEXT,
 	PRIMARY KEY("id" AUTOINCREMENT)
+);
+
+
+
+CREATE TABLE "users" (
+	"id"	INTEGER,
+	"user_name"	TEXT NOT NULL UNIQUE,
+	"display_name"	TEXT NOT NULL UNIQUE,
+	"password"	TEXT NOT NULL,
+	"privilege"	TEXT NOT NULL,
+	PRIMARY KEY("id")
 );

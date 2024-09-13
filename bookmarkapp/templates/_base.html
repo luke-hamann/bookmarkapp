@@ -20,12 +20,18 @@
             <ul>
                 <li><a href="/">Home</a></li>
                 {% if user %}
+                
                 <li>
                     <form action="/logout" method="post">
                         <button type="submit">Logout</button>
                     </form>
                 </li>
                 <li><span>{{ user.display_name }}</span></li>
+                    {% if user.privilege == 'admin' %}
+                        <li>
+                            <a href = "/users">Users</a>
+                        </li>
+                    {% endif %}
                 {% else %}
                 <li><a href="/login{% if return_url %}?return_url={{ return_url }}{% endif %}">Login</a></li>
                 {% endif %}
