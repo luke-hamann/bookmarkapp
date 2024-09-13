@@ -22,9 +22,9 @@ def login_required(old_function):
     return new_function
 
 def get_bookmark_from_form() -> Bookmark:
-    title = request.form.get('title', '')
-    url = request.form.get('url', '')
-    blurb = request.form.get('blurb', '')
+    title = request.form.get('title', '').strip()
+    url = request.form.get('url', '').strip()
+    blurb = request.form.get('blurb', '').strip()
     description = request.form.get('description', '')
     return Bookmark(1, title, url, blurb, description)
 
@@ -136,8 +136,8 @@ def login():
             return redirect(return_url)
         
     else:
-        username = request.form.get('username', None)
-        password = request.form.get('password', None)
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
         return_url = request.form.get('return_url', '/')
         return_url = validate_return_url(return_url)
 
