@@ -1,5 +1,8 @@
 """
     Title: Authentication Helper Fuctions
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-09-05
+    Updated: 2024-09-13
     Purpose: Provide an interface for accessing a user and a CSRF token in a
              Flask session
 """

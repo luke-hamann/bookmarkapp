@@ -1,5 +1,9 @@
 """
     Title: Database Class
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-08-31
+    Updated: 2024-09-13
+    Purpose: This file provides a data class for accessing the database.
     Properties: None
     Methods: get_all_bookmarks, get_bookmark, add_bookmark, update_bookmark,
              delete_bookmark, get_user, authenticate_user

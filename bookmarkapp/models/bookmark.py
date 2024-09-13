@@ -1,5 +1,9 @@
 """
     Title: Bookmark Class
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-08-31
+    Updated: 2024-09-13
+    Purpose: This file provides a data class for representing bookmarks.
     Properties: id, title, url, blurb, description
     Methods: get_errors
 """

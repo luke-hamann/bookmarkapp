@@ -1,5 +1,8 @@
 /*
     Title: Sample Data
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-08-31
+    Updated: 2024-09-13
     Purpose: Insert 5 rows of sample data into the Bookmarks table
 */
 
