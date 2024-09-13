@@ -9,6 +9,7 @@ from bookmarkapp.auth import get_user
 from bookmarkapp.controller import controller
 
 app = Flask("bookmarkapp")
+app.config['DEBUG'] = True
 
 try:
     with open('config.toml', 'rb') as f:
@@ -30,3 +31,9 @@ def internal_server_error(error):
     return render_template("error.html", user=get_user(),
                            title="500 Internal Server Error",
                            message="Something went wrong on our end."), 500
+                           
+@app.errorhandler(403)
+def internal_server_error(error):
+    return render_template("error.html", user=get_user(),
+                           title="403 Forbidden",
+                           message="You don't have the permission to access the requested resource. It is either read-protected or not readable by the server."), 500

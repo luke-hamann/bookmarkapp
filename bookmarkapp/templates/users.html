@@ -33,6 +33,14 @@
                     <td>
                         {{ user.privilege}}
                     </td>
+                    <td>
+                        
+                        <form action="/users/confirm_delete_user" method="POST">
+                            <input type="hidden" name="user_id" value="{{user.id}}"> 
+                            <button type="submit">Delete</button>
+                        </form>
+                        
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -43,7 +51,7 @@
 
 
 
-    <h1>Users</h1>
+    <h1>Add a User</h1>
     <form action="/users/add_user" method="post" class="bookmark_form">
         <label for="user_name">Username*</label>
         <input type="text" name="user_name" id="user_name"  autofocus />

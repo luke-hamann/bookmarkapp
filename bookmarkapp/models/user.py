@@ -27,6 +27,8 @@ class User:
 
 
     def get_errors(self) -> list[str]:
+        #Checks critera for validation of all properties of  User &
+        #returns a list w/ each conflict 
         errors = []
 
         # Validate password
@@ -36,11 +38,12 @@ class User:
                 errors.append(f"Password must be between {User._PASSWORD_MIN_LENGTH:,}-{User._PASSWORD_MAX_LENGTH:,} characters long.")
         if (len(self.password) < User._PASSWORD_MIN_LENGTH):
             errors.append(f"Password must be at least {User._PASSWORD_MAX_LENGTH:,} characters long.")
-        # reg ex pattern to check for 1 number 0-9 & 1 special character
+            # reg ex pattern to check for 1 number 0-9 & 1 special character
         pattern = r'^(?=.*[0-9])(?=.*[!@#$%^&*()]).+$'
         if (not re.match(pattern, self.password)):
             errors.append("Username must contain at least 1 number(0-9), and 1 special character(e.g. $, %, &, #, etc).")
     
+        
         # Validate username
         if (self.user_name == ''):
             errors.append("Username is required.")

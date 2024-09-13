@@ -7,6 +7,9 @@ from functools import wraps
 from flask import abort, Blueprint, redirect, render_template, request, url_for
 from bookmarkapp.auth import get_user, set_user
 from bookmarkapp.models import Bookmark, Database, ExceptionList
+from werkzeug.security import generate_password_hash
+import sqlite3
+from bookmarkapp.models import Database
 
 controller = Blueprint('controller', __name__, url_prefix='/')
 
@@ -17,6 +20,15 @@ def login_required(old_function):
     def new_function(*args, **kwargs):
         if (get_user() is None):
             return redirect(f"/login?return_url={request.path}")
+        return old_function(*args, **kwargs)
+    
+    return new_function
+
+def admin_permission_required(old_function):
+    @wraps(old_function)
+    def new_function(*args, **kwargs):
+        if (get_user().privilege != 'admin'):
+            abort(403)
         return old_function(*args, **kwargs)
     
     return new_function
@@ -158,15 +170,69 @@ def logout():
 
 
 # ----------------------------------------------ADDITION TO PROG----------------------------------------------
-# USERS LIST VIEW METHOD
-@controller.route("/users", methods=['POST'])
-def users_db(id):
+# USERS LIST                VIEW METHOD
+@controller.route("/users", methods=["GET", "POST"])
+@admin_permission_required
+def users():
+
     try:
-        users = Database.get_all_users
-    except ExceptionList:
-        abort(404)
+        users = Database.get_all_users_for_table()
+    # except ExceptionList:
+    #     abort(404)
     except:
         abort(500)
 
     return render_template("users.html", users = users,
-                           return_url=request.path)
+                           return_url=request.path, user = get_user())
+
+
+# ADD USER                  ACTION METHOD
+@controller.route("/users/add_user", methods =["POST",])
+@admin_permission_required
+def add_user():
+    print("st: add_user")
+    try:
+        user_name = request.form['user_name']
+        display_name = request.form['display_name']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        if (password != confirm_password):
+            print(f"add_user R.EL\nPW:{password}\nCP:{confirm_password}")
+            #ADD EXCEPTION HANDLING HERE!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!
+            #MESSAGE USERS 
+            return redirect("/users")
+        else:
+            print('what')
+            hashed_password = generate_password_hash(password)
+            print("add_users, gen'd hashpw")
+            Database.add_user(user_name, display_name, hashed_password)
+
+    except ExceptionList:
+        abort(404)
+    except sqlite3.Error as e:
+        print(f"DB error: {e}, user not added")
+        abort(500)
+    except Exception as e:
+        print(f"Gexc: add_user, error: {e}")
+        abort(500)
+    return redirect("/users")
+
+
+# DELETE USER CONFIRMATION      VIEW METHOD
+@controller.route("/users/confirm_delete_user", methods = ['POST'])
+@admin_permission_required
+def confirm_delete_user():
+    print("st: confirm_delete_user")
+    try:
+        user_id = request.form['user_id']
+
+        target_user = Database.get_user(user_id)
+        if not user:
+            abort(500)
+        print("CDU, user assigned")
+
+    except ExceptionList:
+        abort(404)
+    # except Exception:
+    #     abort(500)
+    return render_template("confirm_delete_user", user = target_useruser)

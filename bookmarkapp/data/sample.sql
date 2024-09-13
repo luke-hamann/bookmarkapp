@@ -54,7 +54,8 @@ VALUES (
 
 
 
---PW here is 'VerySecur3#'
+--UN: top_guy
+--PW VerySecur3#
 INSERT INTO users 
 (user_name, display_name, password, privilege)
 VALUES
@@ -62,7 +63,8 @@ VALUES
 'pbkdf2:sha256:260000$ZZB6QlNvCwTd7WNC$0f433ffe8d4bf92b00b25905f2ba61e5ff8ae573771bb537561dfb6d9b95cf16', 
 'admin');
 
---PW here is 'LetMeIn'
+--UN 2nd_user
+--PW LetMeIn
 INSERT INTO users 
 (user_name, display_name, password, privilege)
 VALUES
@@ -70,8 +72,8 @@ VALUES
 'pbkdf2:sha256:260000$xrLiOOoG9y0q6c7U$60f271e2e34c2c513ceb926e717e7de9b86f0be61cd204ddca9e596816aedfcc', 
 'user');
 
-
---PW here is 'LetMeIn'
+--UN 3rd_user
+--PW LetMeIn
 INSERT INTO users 
 (user_name, display_name, password, privilege)
 VALUES
