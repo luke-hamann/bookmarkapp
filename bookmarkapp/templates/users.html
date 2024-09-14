@@ -9,22 +9,18 @@
 {% extends "_base.html" %}
 
 {% block title %}Confirm Delete{% endblock %}
-
 {% block main %}
     <h1>Users</h1>
-    <!-- {% if user.privilege == 'admin' %}
-    <p><a href="/add">Add Bookmark</a></p>
-    {% endif %} -->
+   
     {% if users|length > 0 %}
         <table class="bookmark_table">
             <thead>
                 <th>Display Name</th>
                 <th>Privilege Level</th>
                 <th>&nbsp;</th>
-
-
             </thead>
-            <tbody>
+            <tbody>        
+                <!-- populate table from users table of DB -->
                 {% for user in users %}
                 <tr>
                     <td>
@@ -34,12 +30,10 @@
                         {{ user.privilege}}
                     </td>
                     <td>
-                        
                         <form action="/users/confirm_delete_user" method="POST">
                             <input type="hidden" name="user_id" value="{{user.id}}"> 
                             <button type="submit">Delete</button>
                         </form>
-                        
                     </td>
                 </tr>
                 {% endfor %}
@@ -48,19 +42,27 @@
     {% else %}
         <p><i>No users in DB</i></p>
     {% endif %}
+    
 
 
+    <!-- Form to add user -->
+        <!-- errors from previous attempts-->
+        <ul class="error_list">
+            {% for error in errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
 
     <h1>Add a User</h1>
-    <form action="/users/add_user" method="post" class="bookmark_form">
+    <form action="/users" method="post" class="bookmark_form">
         <label for="user_name">Username*</label>
         <input type="text" name="user_name" id="user_name"  autofocus />
         <label for="display_name">Display Name*</label>
         <input type="text" name="display_name" id="display_name" />
         <label for="password">Password</label>
-        <input type="text" name="password" id="password" />
+        <input type="password" name="password" id="password" />
         <label for="confirm_password">Confirm Password</label>
-        <input type="text" name="confirm_password" id="confirm_password"></input>
+        <input type="password" name="confirm_password" id="confirm_password"></input>
         <div class="bookmark_form_buttons">
             <button type="submit">Submit</button>
             <a href="/">Cancel</a>

@@ -59,12 +59,10 @@ class Database:
     @classmethod
     def add_bookmark(cls, bookmark: Bookmark, user: User) -> int:
         if (user is None):
-            print("add bm")
             raise ExceptionList(['Authentication is required to add a bookmark.'])
 
         errors = bookmark.get_errors()
         if (len(errors) > 0):
-            print("add bm2")
             raise ExceptionList(errors)
 
         try:
@@ -149,7 +147,6 @@ class Database:
 
     @classmethod
     def get_user(cls, id: int) -> User:
-        print(f"get_user called with id: {id}")
         if id > -1:
             cursor = cls._get_cursor()
             cursor.execute(
@@ -160,17 +157,12 @@ class Database:
                 """, (id,))
             row = cursor.fetchone()
 
-            print(f"Database.getuser: result: {row}")
-
             if row is None:
                 raise ExceptionList(["User not found"])  # List with one string
 
             try:
-                print(f"Attempting to create User object with: {row}")
                 user = User(row[0], "", row[1], "", row[2])
-                print(f"User object created: {user}")
             except Exception as e:
-                print(f"Exception during User object creation: {e}")
                 raise ExceptionList(["Unable to create User"])  # List with one string
 
             return user
@@ -253,8 +245,19 @@ class Database:
 
 
     @classmethod
-    def add_user(cls, user_name, display_name, password, privilege = 'user'):
+    def add_user(cls, user):
         print("DB.add_user START")
+        if (user is None):
+            raise ExceptionList(['Authentication is required to add a user.'])
+
+        print(user.password)
+        errors = user.get_errors()
+        if (len(errors) > 0):
+            raise ExceptionList(errors)
+
+
+        #hash password of new_user
+        user.password = generate_password_hash(password)
         try: 
             cursor = cls._get_cursor()
             cursor.execute("""
@@ -262,7 +265,7 @@ class Database:
                             (user_name, display_name, password, privilege)
                             VALUES
                             (?, ?, ?, ?)
-                           """, (user_name, display_name, password, privilege))
+                           """, (user.user_name, user.display_name, user.password, user.privilege))
             cursor.connection.commit()
 
         except sqlite3.Error as e:
@@ -270,3 +273,22 @@ class Database:
             raise ExceptionList([f'Database error occured: {str(e)}'])
         finally:
             cursor.connection.close()
+        
+    
+    @classmethod
+    def delete_user(cls, user_id):
+        print("DB.delete START")
+        try: 
+            cursor = cls._get_cursor()
+            cursor.execute("""
+                            DELETE FROM users
+                            WHERE id = ?
+                           """, (user_id,))
+            cursor.connection.commit()
+
+        except sqlite3.Error as e:
+            print("delete_user error Sql")
+            raise ExceptionList([f'Database error occured: {str(e)}'])
+        finally:
+            cursor.connection.close()
+            

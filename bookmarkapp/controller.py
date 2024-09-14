@@ -6,7 +6,7 @@
 from functools import wraps
 from flask import abort, Blueprint, redirect, render_template, request, url_for
 from bookmarkapp.auth import get_user, set_user
-from bookmarkapp.models import Bookmark, Database, ExceptionList
+from bookmarkapp.models import Bookmark, Database, ExceptionList, User
 from werkzeug.security import generate_password_hash
 import sqlite3
 from bookmarkapp.models import Database
@@ -67,25 +67,32 @@ def detail(id):
         abort(500)
 
     return render_template("detail.html", bookmark=bookmark,
-                           return_url=request.path, user=get_user())
+                                          return_url=request.path, user=get_user())
 
 # Form Views
 
 @controller.route("/add", methods=["GET", "POST"])
 @login_required
 def add():
+    #page w/ form for user to add bookmark
+
+    
     if (request.method == "GET"):
+        #initial entry: load add.html
         return render_template('add.html', bookmark=None, user=get_user(),
-                               return_url=request.path)
+                                return_url=request.path)
     else:
         try:
+            #on post, try to make bookmark & add to DB
             bookmark = get_bookmark_from_form()
             id = Database.add_bookmark(bookmark, get_user())
         except ExceptionList as e:
+            #on failed atttempt, reload page w/ error_list
             return render_template('add.html', bookmark=bookmark,
                                    errors=e.error_list, user=get_user(),
                                    return_url=request.path)
 
+        #on success redirect to newly created bookmark detail page
         return redirect(id)
 
 @controller.route("/<int:id>/edit", methods=["GET", "POST"])
@@ -108,7 +115,7 @@ def edit(id):
             Database.update_bookmark(bookmark, get_user())
         except ExceptionList as e:
             return render_template('edit.html', bookmark=bookmark,
-                                   errors=e.error_list, user=get_user())
+                                    errors=e.error_list, user=get_user())
         
         return redirect(f'/{id}')
 
@@ -124,7 +131,7 @@ def delete(id):
 
     if (request.method == 'GET'):
         return render_template('delete.html', bookmark=bookmark,
-                               user=get_user())
+                                user=get_user())
     else:
         try:
             Database.delete_bookmark(bookmark, get_user())
@@ -169,51 +176,87 @@ def logout():
     return redirect(url_for('controller.index'))
 
 
-# ----------------------------------------------ADDITION TO PROG----------------------------------------------
+# ----------------------------------------------ADDITION TO APP----------------------------------------------
 # USERS LIST                VIEW METHOD
 @controller.route("/users", methods=["GET", "POST"])
 @admin_permission_required
 def users():
+    #page to allow admin to see user accounts and delete or add them
 
+    #access DB to get user data for table
     try:
         users = Database.get_all_users_for_table()
-    # except ExceptionList:
-    #     abort(404)
-    except:
-        abort(500)
+    except ExceptionList:
+        abort(404)
+    # except:
+    #     abort(500)
 
-    return render_template("users.html", users = users,
+    if (request.method == "GET"):
+        #initial entry: load users.html
+        return render_template("users.html", users = users,
                            return_url=request.path, user = get_user())
+    else: #Posted back to page
+        try:
+            #get data from form
+            user_name = request.form['user_name']
+            display_name = request.form['display_name']
+            password = request.form['password']
+            confirm_password = request.form['confirm_password']
+            #create insance of User
+            new_user = User(-1, user_name, display_name, password)
+            #check for miss matched password
+            if (password != confirm_password):
+                errors = new_user.get_errors
+                errors.append ("Passwords do not match.")
+                raise ExceptionList(errors)
+            #matched passwords-> hashed password to new_user
+            new_user.password = generate_password_hash(password)
 
+            #add to DB
+            Database.add_user(new_user)
+        except ExceptionList as e:
+            return render_template("users.html", users = users, errors = e.error_list,
+                    return_url=request.path, user = get_user())
+        # except: # catch all other exceptions
+        #     abort(500)
+        
+        #reload page after user added
+        return render_template("users.html", users = users,
+                                return_url=request.path, user = get_user())
+                        
 
 # ADD USER                  ACTION METHOD
 @controller.route("/users/add_user", methods =["POST",])
 @admin_permission_required
 def add_user():
     print("st: add_user")
+
     try:
+        #get data from form
         user_name = request.form['user_name']
         display_name = request.form['display_name']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
+
+
+        #create insance of User
+        new_user = User(-1, user_name, display_name, password)
+        
         if (password != confirm_password):
-            print(f"add_user R.EL\nPW:{password}\nCP:{confirm_password}")
-            #ADD EXCEPTION HANDLING HERE!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!!-!-!
-            #MESSAGE USERS 
-            return redirect("/users")
-        else:
-            print('what')
-            hashed_password = generate_password_hash(password)
-            print("add_users, gen'd hashpw")
-            Database.add_user(user_name, display_name, hashed_password)
+            errors = new_user.get_errors
+            errors.append ("Passwords do not match.")
+            raise ExceptionList(errors)
+        
+     
+
+        #add to DB
+        Database.add_user(new_user)
 
     except ExceptionList:
         abort(404)
     except sqlite3.Error as e:
-        print(f"DB error: {e}, user not added")
         abort(500)
     except Exception as e:
-        print(f"Gexc: add_user, error: {e}")
         abort(500)
     return redirect("/users")
 
@@ -222,17 +265,36 @@ def add_user():
 @controller.route("/users/confirm_delete_user", methods = ['POST'])
 @admin_permission_required
 def confirm_delete_user():
-    print("st: confirm_delete_user")
     try:
-        user_id = request.form['user_id']
+        user_id = int(request.form['user_id'])
 
         target_user = Database.get_user(user_id)
-        if not user:
+        if not target_user:
             abort(500)
-        print("CDU, user assigned")
+
+    except ExceptionList:
+        abort(404)
+    except Exception:
+        abort(500)
+    return render_template("confirm_delete_user.html", user = target_user)
+
+
+
+# DELETE USER                      ACTION METHOD
+@controller.route("/users/delete_user", methods = ['POST'])
+@admin_permission_required
+def delete_user():
+    try:
+        user_id = int(request.form['user_id'])
+
+        target_user = Database.get_user(user_id)
+        if not target_user:
+            abort(500)
+        Database.delete_user(user_id)
+
 
     except ExceptionList:
         abort(404)
     # except Exception:
     #     abort(500)
-    return render_template("confirm_delete_user", user = target_useruser)
+    return redirect("/users")
