@@ -5,15 +5,29 @@
 
 from functools import wraps
 from flask import abort, Blueprint, redirect, render_template, request, url_for
-from bookmarkapp.auth import get_user, set_user
 from bookmarkapp.models import Bookmark, Database, ExceptionList, User
 from bookmarkapp.models.util import is_user_name_unique, is_display_name_unique
 import sqlite3
 from bookmarkapp.models import Database
+from bookmarkapp.auth import get_user, set_user, get_csrf_token
 
 controller = Blueprint('controller', __name__, url_prefix='/')
 
 # Helper functions
+
+def get_bookmark_from_form() -> Bookmark:
+    title = request.form.get('title', '').strip()
+    url = request.form.get('url', '').strip()
+    blurb = request.form.get('blurb', '').strip()
+    description = request.form.get('description', '')
+    return Bookmark(1, title, url, blurb, description)
+
+def validate_return_url(return_url):
+    if (return_url.startswith("//") or not return_url.startswith("/")):
+        return_url = "/"
+    return return_url
+
+# View wrappers
 
 def login_required(old_function):
     @wraps(old_function)
@@ -23,6 +37,7 @@ def login_required(old_function):
         return old_function(*args, **kwargs)
     
     return new_function
+
 
 def admin_permission_required(old_function):
     @wraps(old_function)
@@ -40,10 +55,14 @@ def get_bookmark_from_form() -> Bookmark:
     description = request.form.get('description', '')
     return Bookmark(1, title, url, blurb, description)
 
-def validate_return_url(return_url):
-    if (return_url.startswith("//") or not return_url.startswith("/")):
-        return_url = "/"
-    return return_url
+def csrf_protected(old_function):
+    @wraps(old_function)
+    def new_function(*args, **kwargs):
+        if ((request.method == "POST") and
+            (request.form.get('csrf_token', None) != get_csrf_token())):
+            abort(401)
+        return old_function(*args, **kwargs)
+    return new_function
 
 # Read-Only Views
 
@@ -57,7 +76,7 @@ def index():
         abort(500)
 
     return render_template("index.html", bookmarks=bookmarks, user=get_user(),
-                           return_url="/")
+                           return_url="/", csrf_token=get_csrf_token())
 
 
 #DETAIL<id> PAGE            VIEW METHOD
@@ -70,14 +89,14 @@ def detail(id):
     except:
         abort(500)
 
-    return render_template("detail.html", bookmark=bookmark,
-                                          return_url=request.path, user=get_user())
+    return render_template("detail.html", bookmark=bookmark, return_url=request.path, user=get_user(), csrf_token=get_csrf_token())
 
 # Form Views
 
 #ADD BOOKMARK PAGE              VIEW METHOD
 @controller.route("/add", methods=["GET", "POST"])
 @login_required
+@csrf_protected
 def add():
     #page w/ form for user to add bookmark
 
@@ -85,7 +104,9 @@ def add():
     if (request.method == "GET"):
         #initial entry: load add.html
         return render_template('add.html', bookmark=None, user=get_user(),
-                                return_url=request.path)
+
+                               return_url=request.path,
+                               csrf_token=get_csrf_token())
     else:
         try:
             #on post, try to make bookmark & add to DB
@@ -95,7 +116,8 @@ def add():
             #on failed atttempt, reload page w/ error_list
             return render_template('add.html', bookmark=bookmark,
                                    errors=e.error_list, user=get_user(),
-                                   return_url=request.path)
+                                   return_url=request.path,
+                                   csrf_token=get_csrf_token())
 
         #on success redirect to newly created bookmark detail page
         return redirect(id)
@@ -104,6 +126,7 @@ def add():
 #DETAIL<id> EDIT PAGE           VIEW METHOD
 @controller.route("/<int:id>/edit", methods=["GET", "POST"])
 @login_required
+@csrf_protected
 def edit(id):
     if (request.method == "GET"):
         try:
@@ -113,7 +136,8 @@ def edit(id):
         except:
             abort(500)
 
-        return render_template('edit.html', bookmark=bookmark, user=get_user())
+        return render_template('edit.html', bookmark=bookmark, user=get_user(),
+                               csrf_token=get_csrf_token())
     else:
         bookmark = get_bookmark_from_form()
         bookmark.id = id
@@ -122,13 +146,14 @@ def edit(id):
             Database.update_bookmark(bookmark, get_user())
         except ExceptionList as e:
             return render_template('edit.html', bookmark=bookmark,
-                                    errors=e.error_list, user=get_user())
-        
+                                   errors=e.error_list, user=get_user(),
+                                   csrf_token=get_csrf_token())
         return redirect(f'/{id}')
 
 #DETAIL DELETE ROUTE            ACTION METHOD
 @controller.route("/<int:id>/delete", methods=["GET", "POST"])
 @login_required
+@csrf_protected
 def delete(id):
     try:
         bookmark = Database.get_bookmark(id)
@@ -139,19 +164,22 @@ def delete(id):
 
     if (request.method == 'GET'):
         return render_template('delete.html', bookmark=bookmark,
-                                user=get_user())
+                               user=get_user(),
+                               csrf_token=get_csrf_token())
     else:
         try:
             Database.delete_bookmark(bookmark, get_user())
         except ExceptionList as e:
             return render_template('delete.html', bookmark=bookmark,
-                                   user=get_user())
+                                   user=get_user(),
+                                   csrf_token=get_csrf_token())
 
         return redirect('/')
 
 # Authentication
 #LOGIN PAGE                 VIEW METHOD
 @controller.route("/login", methods=["GET", "POST"])
+@csrf_protected
 def login():
     if (request.method == 'GET'):
         return_url = request.args.get('return_url', '/')
@@ -159,14 +187,17 @@ def login():
 
         #If no user load, else send back
         if (get_user() is None):
-            return render_template("login.html", return_url=return_url)
+            return render_template("login.html", return_url=return_url,
+                                   csrf_token=get_csrf_token())
         else:
             return redirect(return_url)
         
+
     else:   #On POST
         #get data from post
-        username = request.form.get('username', None)
-        password = request.form.get('password', None)
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+    else:
         return_url = request.form.get('return_url', '/')
         return_url = validate_return_url(return_url)
 
@@ -176,13 +207,15 @@ def login():
 
         except ExceptionList as e:
             return render_template("login.html", errors=e.error_list,
-                                   return_url=return_url, username=username)
+                                   return_url=return_url, username=username,
+                                   csrf_token=get_csrf_token())
 
         set_user(user)
         return redirect(return_url)
 
 #LOGOUT ROUTE               ACTION METHOD
 @controller.route("/logout", methods=["GET", "POST"])
+@csrf_protected
 def logout():
     if (request.method == 'POST'):
         set_user(None)

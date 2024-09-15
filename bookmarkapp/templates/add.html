@@ -2,6 +2,7 @@
     Title: Add Bookmark Form Template
     Parameters:
         - bookmark: Bookmark
+        - csrf_token: str
         - errors: list[str]
         - return_url: str
         - user: User
@@ -29,6 +30,7 @@
         <input type="text" name="blurb" id="blurb" value="{{ bookmark.blurb }}" />
         <label for="description">Description</label>
         <textarea name="description" id="description">{{ bookmark.description }}</textarea>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="bookmark_form_buttons">
             <button type="submit">Submit</button>
             <a href="/">Cancel</a>

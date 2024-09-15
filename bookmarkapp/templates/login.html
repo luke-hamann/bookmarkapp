@@ -1,6 +1,7 @@
 {#
     Title: Login Form Template
     Parameters:
+        - csrf_token: str
         - errors: list[str]
         - return_url: str
         - user: User
@@ -20,6 +21,7 @@
         <label for="password">Password</label>
         <input type="password" name="password" id="password" {% if username %}autofocus {% endif %}/>
         <input type="hidden" name="return_url" value="{{ return_url }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         {% if errors %}
         <ul class="error_list">
             {% for error in errors %}

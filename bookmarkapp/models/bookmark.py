@@ -33,7 +33,14 @@ class Bookmark:
         if (self.url == ''):
             errors.append("Bookmark URL is required.")
         else:
-            if (("." not in self.url) or ("\n" in self.url)):
+            tests_passed = [
+                ("." in self.url),
+                ("\n" not in self.url),
+                (self.url.startswith("http://") or
+                 self.url.startswith("https://"))
+            ]
+
+            if (not all(tests_passed)):
                 errors.append("Bookmark URL must be a well-formed URL.")
             if (len(self.url) > Bookmark._URL_MAX_LENGTH):
                 errors.append(f"Bookmark URL must be {Bookmark._URL_MAX_LENGTH:,} characters or less.")
