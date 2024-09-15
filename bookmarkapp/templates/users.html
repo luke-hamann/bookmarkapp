@@ -24,22 +24,19 @@
             </thead>
             <tbody>        
                 <!-- populate table from users table of DB -->
-                {% for user in users %}
+                {% for target_user in users %}
                 <tr>
-                    <td> {{ user.user_name }} </td>
-                    <td> {{ user.display_name }} </td>
-                    <td> {{ user.privilege}} </td>
+                    <td> {{ target_user.user_name }} </td>
+                    <td> {{ target_user.display_name }} </td>
+                    <td> {{ target_user.privilege}} </td>
                     <td>
                         <!-- for non admin users, add a delete button-->
-                        {% if user.privilege != "admin" %}
-                        
-
+                        {% if target_user.privilege != "admin" %}
                             <form action="/users/confirm_delete_user" method="POST"> 
-                                <input type="hidden" name="user_id" value="{{user.id}}"> 
+                                <input type="hidden" name="user_id" value="{{target_user.id}}"> 
                                 <input type="hidden" name="csrf_token" value="{{csrf_token}}"> 
                                 <button type="submit" class="user_table_delete_buttons">Delete</button>
-                            
-                        </div>
+                            </form>
                         {% endif %}
                     </td>
                 </tr>
