@@ -30,10 +30,12 @@
                         {{ user.privilege}}
                     </td>
                     <td>
-                        <form action="/users/confirm_delete_user" method="POST">
+                        {% if user.privilege != "admin" %}
+                        <form action="/users/confirm_delete_user" method="POST"> 
                             <input type="hidden" name="user_id" value="{{user.id}}"> 
                             <button type="submit">Delete</button>
                         </form>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

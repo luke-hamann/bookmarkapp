@@ -15,13 +15,12 @@ try:
     with open('config.toml', 'rb') as f:
         app.config.update(tomllib.load(f))
 except FileNotFoundError:
-    print('config.toml not found.')
     exit()
 
 app.register_blueprint(controller)
 
 @app.errorhandler(404)
-def not_found(error):
+def not_found(error): 
     return render_template("error.html", user=get_user(),
                            title="404 Not Found",
                            message="That page does not exist."), 404

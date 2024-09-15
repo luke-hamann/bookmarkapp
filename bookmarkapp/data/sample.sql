@@ -73,7 +73,7 @@ VALUES
 'user');
 
 --UN 3rd_user
---PW LetMeIn
+--PW Sesame
 INSERT INTO users 
 (user_name, display_name, password, privilege)
 VALUES

@@ -7,7 +7,7 @@ from functools import wraps
 from flask import abort, Blueprint, redirect, render_template, request, url_for
 from bookmarkapp.auth import get_user, set_user
 from bookmarkapp.models import Bookmark, Database, ExceptionList, User
-from werkzeug.security import generate_password_hash
+from bookmarkapp.models.util import is_user_name_unique, is_display_name_unique
 import sqlite3
 from bookmarkapp.models import Database
 
@@ -47,6 +47,8 @@ def validate_return_url(return_url):
 
 # Read-Only Views
 
+
+#BOOKMARK LIST PAGE         VIEW METHOD
 @controller.route("/", methods=['GET'])
 def index():
     try:
@@ -57,6 +59,8 @@ def index():
     return render_template("index.html", bookmarks=bookmarks, user=get_user(),
                            return_url="/")
 
+
+#DETAIL<id> PAGE            VIEW METHOD
 @controller.route("/<int:id>", methods=['GET'])
 def detail(id):
     try:
@@ -71,6 +75,7 @@ def detail(id):
 
 # Form Views
 
+#ADD BOOKMARK PAGE              VIEW METHOD
 @controller.route("/add", methods=["GET", "POST"])
 @login_required
 def add():
@@ -95,6 +100,8 @@ def add():
         #on success redirect to newly created bookmark detail page
         return redirect(id)
 
+
+#DETAIL<id> EDIT PAGE           VIEW METHOD
 @controller.route("/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 def edit(id):
@@ -119,6 +126,7 @@ def edit(id):
         
         return redirect(f'/{id}')
 
+#DETAIL DELETE ROUTE            ACTION METHOD
 @controller.route("/<int:id>/delete", methods=["GET", "POST"])
 @login_required
 def delete(id):
@@ -142,26 +150,30 @@ def delete(id):
         return redirect('/')
 
 # Authentication
-
+#LOGIN PAGE                 VIEW METHOD
 @controller.route("/login", methods=["GET", "POST"])
 def login():
     if (request.method == 'GET'):
         return_url = request.args.get('return_url', '/')
         return_url = validate_return_url(return_url)
 
+        #If no user load, else send back
         if (get_user() is None):
             return render_template("login.html", return_url=return_url)
         else:
             return redirect(return_url)
         
-    else:
+    else:   #On POST
+        #get data from post
         username = request.form.get('username', None)
         password = request.form.get('password', None)
         return_url = request.form.get('return_url', '/')
         return_url = validate_return_url(return_url)
 
+        #try to authenticate, else reload w/ errors
         try:
             user = Database.authenticate_user(username, password)
+
         except ExceptionList as e:
             return render_template("login.html", errors=e.error_list,
                                    return_url=return_url, username=username)
@@ -169,14 +181,14 @@ def login():
         set_user(user)
         return redirect(return_url)
 
+#LOGOUT ROUTE               ACTION METHOD
 @controller.route("/logout", methods=["GET", "POST"])
 def logout():
     if (request.method == 'POST'):
         set_user(None)
     return redirect(url_for('controller.index'))
 
-
-# ----------------------------------------------ADDITION TO APP----------------------------------------------
+# ----------------------------------------------USER FUNCTIONALITY ADDITION TO APP----------------------------------------------
 # USERS LIST                VIEW METHOD
 @controller.route("/users", methods=["GET", "POST"])
 @admin_permission_required
@@ -188,8 +200,8 @@ def users():
         users = Database.get_all_users_for_table()
     except ExceptionList:
         abort(404)
-    # except:
-    #     abort(500)
+    except:
+        abort(500)
 
     if (request.method == "GET"):
         #initial entry: load users.html
@@ -202,18 +214,24 @@ def users():
             display_name = request.form['display_name']
             password = request.form['password']
             confirm_password = request.form['confirm_password']
+
+
             #create insance of User
             new_user = User(-1, user_name, display_name, password)
-            #check for miss matched password
+            #check for non-matching passwords
             if (password != confirm_password):
-                errors = new_user.get_errors
+                errors = new_user.get_errors()
                 errors.append ("Passwords do not match.")
                 raise ExceptionList(errors)
             #matched passwords-> hashed password to new_user
-            new_user.password = generate_password_hash(password)
+
+            errors = new_user.get_errors()
+            if (len(errors) > 0):
+                raise ExceptionList(errors)
+
 
             #add to DB
-            Database.add_user(new_user)
+            Database.add_user(new_user, auth_user= get_user())
         except ExceptionList as e:
             return render_template("users.html", users = users, errors = e.error_list,
                     return_url=request.path, user = get_user())
@@ -225,40 +243,6 @@ def users():
                                 return_url=request.path, user = get_user())
                         
 
-# ADD USER                  ACTION METHOD
-@controller.route("/users/add_user", methods =["POST",])
-@admin_permission_required
-def add_user():
-    print("st: add_user")
-
-    try:
-        #get data from form
-        user_name = request.form['user_name']
-        display_name = request.form['display_name']
-        password = request.form['password']
-        confirm_password = request.form['confirm_password']
-
-
-        #create insance of User
-        new_user = User(-1, user_name, display_name, password)
-        
-        if (password != confirm_password):
-            errors = new_user.get_errors
-            errors.append ("Passwords do not match.")
-            raise ExceptionList(errors)
-        
-     
-
-        #add to DB
-        Database.add_user(new_user)
-
-    except ExceptionList:
-        abort(404)
-    except sqlite3.Error as e:
-        abort(500)
-    except Exception as e:
-        abort(500)
-    return redirect("/users")
 
 
 # DELETE USER CONFIRMATION      VIEW METHOD
@@ -266,17 +250,25 @@ def add_user():
 @admin_permission_required
 def confirm_delete_user():
     try:
+        #get id from POST => User from DB
         user_id = int(request.form['user_id'])
-
         target_user = Database.get_user(user_id)
-        if not target_user:
+
+        # if target is admin => abort
+        if (target_user.privilege == 'admin'):
+            abort(403)
+        
+        #if no user in DB => abort
+        if (not target_user):
             abort(500)
 
     except ExceptionList:
         abort(404)
     except Exception:
         abort(500)
-    return render_template("confirm_delete_user.html", user = target_user)
+    finally: 
+        #render confirm_delete_user
+        return render_template("confirm_delete_user.html", user = target_user)
 
 
 
@@ -285,9 +277,15 @@ def confirm_delete_user():
 @admin_permission_required
 def delete_user():
     try:
+        #get id from POST => User from DB
         user_id = int(request.form['user_id'])
-
         target_user = Database.get_user(user_id)
+
+        # if target is admin => abort
+        if (target_user.privilege == 'admin'):
+            abort(403)
+
+        #if no user in DB => abort
         if not target_user:
             abort(500)
         Database.delete_user(user_id)
@@ -295,6 +293,7 @@ def delete_user():
 
     except ExceptionList:
         abort(404)
-    # except Exception:
-    #     abort(500)
+    except Exception:
+        abort(500)
     return redirect("/users")
+
