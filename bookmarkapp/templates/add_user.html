@@ -24,7 +24,6 @@
         </ul>
     {% endif %}
     
-    <h1>Add a User</h1>
     <form action="/users/add" method="post" class="bookmark_form">
         <input type="hidden" name="csrf_token" value = {{csrf_token}}>
         <label for="user_name">Username*</label>

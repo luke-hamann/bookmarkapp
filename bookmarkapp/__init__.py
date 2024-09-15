@@ -8,17 +8,26 @@ from flask import Flask, render_template
 from bookmarkapp.auth import get_user, get_csrf_token
 from bookmarkapp.controller import controller
 
-app = Flask("bookmarkapp")
-app.config['DEBUG'] = True
 
+# Initialize the Flask application.
+# used to define routes, handle requests, and configure application
+app = Flask("bookmarkapp")
+
+
+# Opens config.toml to set configuration variables
 try:
     with open('config.toml', 'rb') as f:
         app.config.update(tomllib.load(f))
 except FileNotFoundError:
     exit()
 
+
+# Create blueprint used for routing
 app.register_blueprint(controller)
 
+
+# Error handlers for expected HTTP errors
+# Renders custom error page w/ title and message
 @app.errorhandler(401)
 def unauthorized(error):
     return render_template("error.html", user=get_user(),

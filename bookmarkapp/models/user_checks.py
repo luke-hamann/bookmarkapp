@@ -1,7 +1,8 @@
 """
-    Title: Util Class
+    Title: User Checks Module
     Properties: id, username, display_name, password, privilege
-    Methods: get_errors
+    Methods: is_user_name_unique, is_display_name_unique, _get_cusor
+    Description: Has database read methods to validate new users for unique  diplay and user names 
 """
 import sqlite3
 from bookmarkapp.models import ExceptionList
@@ -10,6 +11,7 @@ from bookmarkapp.models import ExceptionList
 
 
 def _get_cursor() -> sqlite3.Cursor:
+    #prepares cursor to connect to database
     _DATABASE_PATH = 'bookmarkapp/data/database.db'
     return sqlite3.connect(_DATABASE_PATH).cursor()
 

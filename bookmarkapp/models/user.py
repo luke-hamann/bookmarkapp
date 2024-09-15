@@ -2,9 +2,11 @@
     Title: User Class
     Properties: id, username, display_name, password, privilege
     Methods: get_errors
+    Description: Represents users w/ properties.
+                 Has function to validate properties meet desired criteria
 """
 import re
-from bookmarkapp.models.util import is_user_name_unique, is_display_name_unique
+from bookmarkapp.models.user_checks import is_user_name_unique, is_display_name_unique
 
 
 class User:
@@ -20,6 +22,7 @@ class User:
     
 
     def __init__(self, id: int = -1, user_name: str = ''  , display_name: str = '', password: str = '', privilege: str = 'user') -> None:
+        #Constructor for User
         self.id = id
         self.user_name = user_name
         self.display_name = display_name

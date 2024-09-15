@@ -6,7 +6,7 @@
 from functools import wraps
 from flask import abort, Blueprint, redirect, render_template, request, url_for
 from bookmarkapp.models import Bookmark, Database, ExceptionList, User
-from bookmarkapp.models.util import is_user_name_unique, is_display_name_unique
+from bookmarkapp.models.user_checks import is_user_name_unique, is_display_name_unique
 import sqlite3
 from bookmarkapp.models import Database
 from bookmarkapp.auth import get_user, set_user, get_csrf_token
@@ -31,7 +31,7 @@ def validate_return_url(return_url):
 
 
 # View wrappers
-#LOGIN_REQUIRED         WRAPPER FUNCTION
+# LOGIN_REQUIRED                WRAPPER FUNCTION
 def login_required(old_function):
     #validates the client has a valid user in the session else: redirects to login
     @wraps(old_function)
@@ -41,7 +41,7 @@ def login_required(old_function):
         return old_function(*args, **kwargs)
     return new_function
 
-
+# ADMIN_PERMISSION_REQUIRED     WRAPPER FUNCTION
 def admin_permission_required(old_function):
     #validates the client has a user w/ admin privilege in the session else: redirects to login
     @wraps(old_function)
@@ -51,13 +51,12 @@ def admin_permission_required(old_function):
         return old_function(*args, **kwargs)
     
     return new_function
-
+# CSRF PROTECTED                WRAPPER FUNCTION
 def csrf_protected(old_function):
     #On pages enterd by POST request, 
     #Compares csrf_token in POST to csrf_token in SESSION, if != then  abort(401)
     @wraps(old_function)
     def new_function(*args, **kwargs):
-        print("CSFR POST:\t" + str(request.form.get('csrf_token', None)) + "\nCSRF SESSION:\t" + str(get_csrf_token()))
         if ((request.method == "POST") and
             (request.form.get('csrf_token', None) != get_csrf_token())):
             abort(401)
@@ -66,10 +65,12 @@ def csrf_protected(old_function):
 
 
 
-# Read-Only Views
+# ----------------------------------------------    Bookmark funcitons     ----------------------------------------------
 
 
-#BOOKMARK LIST PAGE         VIEW METHOD
+# ------------- Bookmark Read Only -----------------
+
+#BOOKMARK LIST PAGE         VIEW FUNCTION
 @controller.route("/", methods=['GET'])
 def index():
     try:
@@ -84,7 +85,7 @@ def index():
                            csrf_token=get_csrf_token())
 
 
-#DETAIL<id> PAGE            VIEW METHOD
+#DETAIL<id> PAGE            VIEW FUNCTION
 @controller.route("/<int:id>", methods=['GET'])
 def detail(id):
     try:
@@ -101,8 +102,9 @@ def detail(id):
                            csrf_token=get_csrf_token())
 
 # Form Views
+# ------------- Bookmark CRUD  -----------------
 
-#ADD BOOKMARK PAGE              VIEW METHOD
+#ADD BOOKMARK PAGE              VIEW FUNCTION
 @controller.route("/add", methods=["GET", "POST"])
 @login_required
 @csrf_protected
@@ -135,7 +137,7 @@ def add():
         return redirect(id)
 
 
-#DETAIL<id> EDIT PAGE           VIEW METHOD
+#DETAIL<id> EDIT PAGE           VIEW FUNCTION
 @controller.route("/<int:id>/edit", methods=["GET", "POST"])
 @login_required
 @csrf_protected
@@ -166,7 +168,7 @@ def edit(id):
                                    csrf_token=get_csrf_token())
         return redirect(f'/{id}')
 
-#DETAIL DELETE ROUTE            ACTION METHOD
+#DETAIL DELETE ROUTE            ACTION FUNCTION
 @controller.route("/<int:id>/delete", methods=["GET", "POST"])
 @login_required
 @csrf_protected
@@ -194,8 +196,9 @@ def delete(id):
 
         return redirect('/')
 
-# Authentication
-#LOGIN PAGE                 VIEW METHOD
+# ----------------------------------------------    Authentication     ----------------------------------------------
+
+#LOGIN PAGE                 VIEW FUNCTION
 @controller.route("/login", methods=["GET", "POST"])
 @csrf_protected
 def login():
@@ -233,7 +236,7 @@ def login():
         set_user(user)
         return redirect(return_url)
 
-#LOGOUT ROUTE               ACTION METHOD
+#LOGOUT ROUTE               ACTION FUNCTION
 @controller.route("/logout", methods=["GET", "POST"])
 @csrf_protected
 def logout():
@@ -241,8 +244,8 @@ def logout():
         set_user(None)
     return redirect(url_for('controller.index'))
 
-# ----------------------------------------------USER FUNCTIONALITY ADDITION TO APP----------------------------------------------
-# USERS LIST                VIEW METHOD
+# ----------------------------------------------    User Functionalty    ----------------------------------------------
+# USERS LIST                VIEW FUNCTION
 @controller.route("/users", methods=["GET", "POST"])
 @admin_permission_required
 @csrf_protected
@@ -263,42 +266,42 @@ def users():
                                users = users,
                                return_url=request.path, user = get_user(),
                                csrf_token=get_csrf_token())
-    else: #Posted back to page
-        try:
-            #get data from form
-            user_name = request.form['user_name']
-            display_name = request.form['display_name']
-            password = request.form['password']
-            confirm_password = request.form['confirm_password']
+    # else: #Posted back to page
+    #     try:
+    #         #get data from form
+    #         user_name = request.form['user_name']
+    #         display_name = request.form['display_name']
+    #         password = request.form['password']
+    #         confirm_password = request.form['confirm_password']
 
 
-            #create insance of User
-            new_user = User(-1, user_name, display_name, password)
-            #check for non-matching passwords
-            if (password != confirm_password):
-                errors = new_user.get_errors()
-                errors.append ("Passwords do not match.")
-                raise ExceptionList(errors)
-            #matched passwords-> hashed password to new_user
+    #         #create insance of User
+    #         new_user = User(-1, user_name, display_name, password)
+    #         #check for non-matching passwords
+    #         if (password != confirm_password):
+    #             errors = new_user.get_errors()
+    #             errors.append ("Passwords do not match.")
+    #             raise ExceptionList(errors)
+    #         #matched passwords-> hashed password to new_user
 
-            errors = new_user.get_errors()
-            if (len(errors) > 0):
-                raise ExceptionList(errors)
+    #         errors = new_user.get_errors()
+    #         if (len(errors) > 0):
+    #             raise ExceptionList(errors)
 
 
-            #add to DB
-            Database.add_user(new_user, auth_user= get_user())
-        except ExceptionList as e:
-            return render_template("users.html", 
-                                   users = users, 
-                                   errors = e.error_list,
-                                   return_url=request.path, 
-                                   user = get_user(),
-                                   csrf_token=get_csrf_token())
-        except: # catch all other exceptions
-            abort(500)
+    #         #add to DB
+    #         Database.add_user(new_user, auth_user= get_user())
+    #     except ExceptionList as e:
+    #         return render_template("users.html", 
+    #                                users = users, 
+    #                                errors = e.error_list,
+    #                                return_url=request.path, 
+    #                                user = get_user(),
+    #                                csrf_token=get_csrf_token())
+    #     except: # catch all other exceptions
+    #         abort(500)
         
-        #reload page after user added
+    #     #reload page after user added
         return render_template("users.html", 
                                 users = users,
                                 return_url=request.path, 
@@ -308,7 +311,7 @@ def users():
 
 
 
-# DELETE USER CONFIRMATION      VIEW METHOD
+# DELETE USER CONFIRMATION      VIEW FUNCTION
 @controller.route("/users/confirm_delete_user", methods = ['POST'])
 @admin_permission_required
 @csrf_protected
@@ -338,7 +341,7 @@ def confirm_delete_user():
 
 
 
-# DELETE USER                      ACTION METHOD
+# DELETE USER                      ACTION FUNCTION
 @controller.route("/users/delete_user", methods = ['POST'])
 @admin_permission_required
 @csrf_protected
@@ -355,7 +358,7 @@ def delete_user():
         #if no user in DB => abort
         if not target_user:
             abort(500)
-        Database.delete_user(user_id)
+        Database.delete_user(user_id, get_user())
 
 
     except ExceptionList:
@@ -365,7 +368,7 @@ def delete_user():
     return redirect("/users")
 
 
-# ADD USER                          VIEW METHOD
+# ADD USER                          VIEW FUNCTION
 @controller.route("/users/add", methods = ['GET', 'POST'])
 @admin_permission_required
 @csrf_protected
@@ -394,8 +397,8 @@ def add_user():
                     errors = new_user.get_errors()
                     errors.append ("Passwords do not match.")
                     raise ExceptionList(errors)
-                #matched passwords-> hashed password to new_user
 
+                #if errors, raise exception
                 errors = new_user.get_errors()
                 if (len(errors) > 0):
                     raise ExceptionList(errors)
@@ -403,6 +406,7 @@ def add_user():
 
                 #add to DB
                 Database.add_user(new_user, auth_user= get_user())
+
             except ExceptionList as e:
                 return render_template("add_user.html", 
                                     new_user = new_user, 
@@ -413,7 +417,7 @@ def add_user():
             except: # catch all other exceptions
                 abort(500)
             
-            #on success, redirect to /users
+            # On success, redirect to /users
             return redirect("/users")
         
 

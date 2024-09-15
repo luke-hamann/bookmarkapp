@@ -17,6 +17,7 @@
     {% if users|length > 0 %}
         <table class="users_table">
             <thead>
+                <th>Username</th>
                 <th>Display Name</th>
                 <th>Privilege Level</th>
                 <th>&nbsp;</th>
@@ -25,6 +26,7 @@
                 <!-- populate table from users table of DB -->
                 {% for user in users %}
                 <tr>
+                    <td> {{ user.user_name }} </td>
                     <td> {{ user.display_name }} </td>
                     <td> {{ user.privilege}} </td>
                     <td>

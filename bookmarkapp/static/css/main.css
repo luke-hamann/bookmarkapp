@@ -47,6 +47,8 @@ header {
 header nav ul {
     display: flex;
     list-style-type: none;
+    justify-content: flex-start; 
+    gap: 10px; 
 }
 
 header a, header span {
@@ -58,6 +60,25 @@ header button {
     display: block;
     margin: 1rem;
 }
+
+
+#nav_display_name{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem;
+}
+
+        /*nav spacing*/
+
+.left-item {
+    margin-right: auto;
+}
+
+.right-item {
+    margin-left: auto; 
+}
+
 
 /* Main */
 

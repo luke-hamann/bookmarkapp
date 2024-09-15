@@ -19,28 +19,26 @@
     <header>
         <nav>
             <ul>
+             
+                        <li class=><a href="/">Home</a></li>
                 {% if user %}
-                <li><span>{{ user.display_name }}</span></li>
-                {% endif %}
-                <li><a href="/">Home</a></li>
-
-                {% if user %}
-                
-               
                     {% if user.privilege == 'admin' %}
-                        <li>
+                        <li class="left-item">
                             <a href = "/users">Users</a>
                         </li>
                     {% endif %}
-                <li>
-                    <form action="/logout" method="post">
-                        <input type="hidden" name="csrf_token"
-                            value="{{ csrf_token }}" />
-                        <button type="submit">Logout</button>
-                    </form>
-                </li>
+                        <li id="nav_logout" class="right-item">
+                            <form action="/logout" method="post">
+                                <input type="hidden" name="csrf_token"
+                                    value="{{ csrf_token }}" />
+                                <button type="submit">Logout</button>
+                            </form>
+                        </li>
                 {% else %}
-                <li><a href="/login{% if return_url %}?return_url={{ return_url }}{% endif %}">Login</a></li>
+                        <li id="nav_login" class="left-item"><a href="/login{% if return_url %}?return_url={{ return_url }}{% endif %}">Login</a></li>
+                {% endif %}
+                {% if user %}
+                        <li id="nav_display_name">{{ user.display_name }}</li>
                 {% endif %}
             </ul>
         </nav>
