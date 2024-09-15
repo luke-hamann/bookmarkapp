@@ -246,7 +246,7 @@ def logout():
 
 # ----------------------------------------------    User Functionalty    ----------------------------------------------
 # USERS LIST                VIEW FUNCTION
-@controller.route("/users", methods=["GET", "POST"])
+@controller.route("/users", methods=["GET"])
 @admin_permission_required
 @csrf_protected
 def users():
@@ -260,54 +260,13 @@ def users():
     except:
         abort(500)
 
-    if (request.method == "GET"):
-        #initial entry: load users.html
-        return render_template("users.html", 
-                               users = users,
-                               return_url=request.path, user = get_user(),
-                               csrf_token=get_csrf_token())
-    # else: #Posted back to page
-    #     try:
-    #         #get data from form
-    #         user_name = request.form['user_name']
-    #         display_name = request.form['display_name']
-    #         password = request.form['password']
-    #         confirm_password = request.form['confirm_password']
+    
+    return render_template("users.html", 
+                            users = users,
+                            return_url=request.path, 
+                            user = get_user(),
+                            csrf_token=get_csrf_token())
 
-
-    #         #create insance of User
-    #         new_user = User(-1, user_name, display_name, password)
-    #         #check for non-matching passwords
-    #         if (password != confirm_password):
-    #             errors = new_user.get_errors()
-    #             errors.append ("Passwords do not match.")
-    #             raise ExceptionList(errors)
-    #         #matched passwords-> hashed password to new_user
-
-    #         errors = new_user.get_errors()
-    #         if (len(errors) > 0):
-    #             raise ExceptionList(errors)
-
-
-    #         #add to DB
-    #         Database.add_user(new_user, auth_user= get_user())
-    #     except ExceptionList as e:
-    #         return render_template("users.html", 
-    #                                users = users, 
-    #                                errors = e.error_list,
-    #                                return_url=request.path, 
-    #                                user = get_user(),
-    #                                csrf_token=get_csrf_token())
-    #     except: # catch all other exceptions
-    #         abort(500)
-        
-    #     #reload page after user added
-        return render_template("users.html", 
-                                users = users,
-                                return_url=request.path, 
-                                user = get_user(), 
-                                csrf_token=get_csrf_token())
-                        
 
 
 
@@ -321,23 +280,25 @@ def confirm_delete_user():
         user_id = int(request.form['user_id'])
         target_user = Database.get_user(user_id)
 
+        #if no user in DB => abort
+        if (not target_user):
+            abort(404)
+        
         # if target is admin => abort
         if (target_user.privilege == 'admin'):
             abort(403)
         
-        #if no user in DB => abort
-        if (not target_user):
-            abort(500)
+        #render confirm_delete_user
+        return render_template("confirm_delete_user.html", 
+                               user = get_user(),
+                               target_user = target_user, 
+                               csrf_token=get_csrf_token())
 
     except ExceptionList:
         abort(404)
     except Exception:
         abort(500)
-    finally: 
-        #render confirm_delete_user
-        return render_template("confirm_delete_user.html", 
-                               user = target_user, 
-                               csrf_token=get_csrf_token())
+   
 
 
 

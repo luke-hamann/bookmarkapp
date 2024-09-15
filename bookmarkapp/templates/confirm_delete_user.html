@@ -4,6 +4,7 @@
         - user_id: int
         - return_url: str
         - user: User
+        - target_user: User
 #}
 
 {% extends "_base.html" %}
@@ -13,9 +14,9 @@
 {% block main %}
     <h1>Confirm Delete</h1>
     <form action="/users/delete_user" method="POST" class="delete_form">
-        <p>Are you sure you want to delete "{{ user.display_name }}"?</p>
+        <p>Are you sure you want to delete "{{ target_user.display_name }}"?</p>
             <input type="hidden" name="csrf_token" value="{{csrf_token}}"> 
-            <input type="hidden" name="user_id" value={{user.id}}>
+            <input type="hidden" name="user_id" value={{target_user.id}}>
             <!--Yes button-->
             <button type="submit" class="bookmark_form_buttons">Yes</button>
             <!--Cancel Button-->
