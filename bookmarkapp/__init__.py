@@ -44,5 +44,5 @@ def internal_server_error(error):
 def internal_server_error(error):
     return render_template("error.html", user=get_user(),
                            title="403 Forbidden",
-                           message="You don't have the permission to access the requested resource. It is either read-protected or not readable by the server."),
+                           message="You don't have the permission to access the requested resource. It is either read-protected or not readable by the server.",
                            csrf_token=get_csrf_token()), 500

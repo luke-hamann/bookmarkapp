@@ -16,6 +16,7 @@ controller = Blueprint('controller', __name__, url_prefix='/')
 # Helper functions
 
 def get_bookmark_from_form() -> Bookmark:
+    #gets vars from POST & uses them to return a Bookmark
     title = request.form.get('title', '').strip()
     url = request.form.get('url', '').strip()
     blurb = request.form.get('blurb', '').strip()
@@ -23,23 +24,26 @@ def get_bookmark_from_form() -> Bookmark:
     return Bookmark(1, title, url, blurb, description)
 
 def validate_return_url(return_url):
+    #ensures url either starts w/ '/' or doesn't start w/ '//', if it does => url ='/'
     if (return_url.startswith("//") or not return_url.startswith("/")):
         return_url = "/"
     return return_url
 
-# View wrappers
 
+# View wrappers
+#LOGIN_REQUIRED         WRAPPER FUNCTION
 def login_required(old_function):
+    #validates the client has a valid user in the session else: redirects to login
     @wraps(old_function)
     def new_function(*args, **kwargs):
         if (get_user() is None):
             return redirect(f"/login?return_url={request.path}")
         return old_function(*args, **kwargs)
-    
     return new_function
 
 
 def admin_permission_required(old_function):
+    #validates the client has a user w/ admin privilege in the session else: redirects to login
     @wraps(old_function)
     def new_function(*args, **kwargs):
         if (get_user().privilege != 'admin'):
@@ -48,21 +52,19 @@ def admin_permission_required(old_function):
     
     return new_function
 
-def get_bookmark_from_form() -> Bookmark:
-    title = request.form.get('title', '')
-    url = request.form.get('url', '')
-    blurb = request.form.get('blurb', '')
-    description = request.form.get('description', '')
-    return Bookmark(1, title, url, blurb, description)
-
 def csrf_protected(old_function):
+    #On pages enterd by POST request, 
+    #Compares csrf_token in POST to csrf_token in SESSION, if != then  abort(401)
     @wraps(old_function)
     def new_function(*args, **kwargs):
+        print("CSFR POST:\t" + str(request.form.get('csrf_token', None)) + "\nCSRF SESSION:\t" + str(get_csrf_token()))
         if ((request.method == "POST") and
             (request.form.get('csrf_token', None) != get_csrf_token())):
             abort(401)
         return old_function(*args, **kwargs)
     return new_function
+
+
 
 # Read-Only Views
 
@@ -75,8 +77,11 @@ def index():
     except:
         abort(500)
 
-    return render_template("index.html", bookmarks=bookmarks, user=get_user(),
-                           return_url="/", csrf_token=get_csrf_token())
+    return render_template("index.html", 
+                           bookmarks=bookmarks, 
+                           user=get_user(),
+                           return_url="/", 
+                           csrf_token=get_csrf_token())
 
 
 #DETAIL<id> PAGE            VIEW METHOD
@@ -89,7 +94,11 @@ def detail(id):
     except:
         abort(500)
 
-    return render_template("detail.html", bookmark=bookmark, return_url=request.path, user=get_user(), csrf_token=get_csrf_token())
+    return render_template("detail.html", 
+                           bookmark=bookmark, 
+                           return_url=request.path, 
+                           user=get_user(), 
+                           csrf_token=get_csrf_token())
 
 # Form Views
 
@@ -103,8 +112,9 @@ def add():
     
     if (request.method == "GET"):
         #initial entry: load add.html
-        return render_template('add.html', bookmark=None, user=get_user(),
-
+        return render_template('add.html', 
+                               bookmark=None, 
+                               user=get_user(),
                                return_url=request.path,
                                csrf_token=get_csrf_token())
     else:
@@ -114,8 +124,10 @@ def add():
             id = Database.add_bookmark(bookmark, get_user())
         except ExceptionList as e:
             #on failed atttempt, reload page w/ error_list
-            return render_template('add.html', bookmark=bookmark,
-                                   errors=e.error_list, user=get_user(),
+            return render_template('add.html', 
+                                   bookmark=bookmark,
+                                   errors=e.error_list, 
+                                   user=get_user(),
                                    return_url=request.path,
                                    csrf_token=get_csrf_token())
 
@@ -136,7 +148,9 @@ def edit(id):
         except:
             abort(500)
 
-        return render_template('edit.html', bookmark=bookmark, user=get_user(),
+        return render_template('edit.html', 
+                               bookmark=bookmark, 
+                               user=get_user(), 
                                csrf_token=get_csrf_token())
     else:
         bookmark = get_bookmark_from_form()
@@ -145,8 +159,10 @@ def edit(id):
         try:
             Database.update_bookmark(bookmark, get_user())
         except ExceptionList as e:
-            return render_template('edit.html', bookmark=bookmark,
-                                   errors=e.error_list, user=get_user(),
+            return render_template('edit.html', 
+                                   bookmark=bookmark,
+                                   errors=e.error_list, 
+                                   user=get_user(),
                                    csrf_token=get_csrf_token())
         return redirect(f'/{id}')
 
@@ -163,14 +179,16 @@ def delete(id):
         abort(500)
 
     if (request.method == 'GET'):
-        return render_template('delete.html', bookmark=bookmark,
+        return render_template('delete.html', 
+                               bookmark=bookmark,
                                user=get_user(),
                                csrf_token=get_csrf_token())
     else:
         try:
             Database.delete_bookmark(bookmark, get_user())
         except ExceptionList as e:
-            return render_template('delete.html', bookmark=bookmark,
+            return render_template('delete.html', 
+                                   bookmark=bookmark,
                                    user=get_user(),
                                    csrf_token=get_csrf_token())
 
@@ -187,7 +205,8 @@ def login():
 
         #If no user load, else send back
         if (get_user() is None):
-            return render_template("login.html", return_url=return_url,
+            return render_template("login.html", 
+                                   return_url=return_url,
                                    csrf_token=get_csrf_token())
         else:
             return redirect(return_url)
@@ -197,7 +216,6 @@ def login():
         #get data from post
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
-    else:
         return_url = request.form.get('return_url', '/')
         return_url = validate_return_url(return_url)
 
@@ -206,8 +224,10 @@ def login():
             user = Database.authenticate_user(username, password)
 
         except ExceptionList as e:
-            return render_template("login.html", errors=e.error_list,
-                                   return_url=return_url, username=username,
+            return render_template("login.html", 
+                                   errors=e.error_list,
+                                   return_url=return_url, 
+                                   username=username,
                                    csrf_token=get_csrf_token())
 
         set_user(user)
@@ -225,6 +245,7 @@ def logout():
 # USERS LIST                VIEW METHOD
 @controller.route("/users", methods=["GET", "POST"])
 @admin_permission_required
+@csrf_protected
 def users():
     #page to allow admin to see user accounts and delete or add them
 
@@ -238,8 +259,10 @@ def users():
 
     if (request.method == "GET"):
         #initial entry: load users.html
-        return render_template("users.html", users = users,
-                           return_url=request.path, user = get_user())
+        return render_template("users.html", 
+                               users = users,
+                               return_url=request.path, user = get_user(),
+                               csrf_token=get_csrf_token())
     else: #Posted back to page
         try:
             #get data from form
@@ -266,14 +289,21 @@ def users():
             #add to DB
             Database.add_user(new_user, auth_user= get_user())
         except ExceptionList as e:
-            return render_template("users.html", users = users, errors = e.error_list,
-                    return_url=request.path, user = get_user())
-        # except: # catch all other exceptions
-        #     abort(500)
+            return render_template("users.html", 
+                                   users = users, 
+                                   errors = e.error_list,
+                                   return_url=request.path, 
+                                   user = get_user(),
+                                   csrf_token=get_csrf_token())
+        except: # catch all other exceptions
+            abort(500)
         
         #reload page after user added
-        return render_template("users.html", users = users,
-                                return_url=request.path, user = get_user())
+        return render_template("users.html", 
+                                users = users,
+                                return_url=request.path, 
+                                user = get_user(), 
+                                csrf_token=get_csrf_token())
                         
 
 
@@ -281,6 +311,7 @@ def users():
 # DELETE USER CONFIRMATION      VIEW METHOD
 @controller.route("/users/confirm_delete_user", methods = ['POST'])
 @admin_permission_required
+@csrf_protected
 def confirm_delete_user():
     try:
         #get id from POST => User from DB
@@ -301,13 +332,16 @@ def confirm_delete_user():
         abort(500)
     finally: 
         #render confirm_delete_user
-        return render_template("confirm_delete_user.html", user = target_user)
+        return render_template("confirm_delete_user.html", 
+                               user = target_user, 
+                               csrf_token=get_csrf_token())
 
 
 
 # DELETE USER                      ACTION METHOD
 @controller.route("/users/delete_user", methods = ['POST'])
 @admin_permission_required
+@csrf_protected
 def delete_user():
     try:
         #get id from POST => User from DB
@@ -329,4 +363,57 @@ def delete_user():
     except Exception:
         abort(500)
     return redirect("/users")
+
+
+# ADD USER                          VIEW METHOD
+@controller.route("/users/add", methods = ['GET', 'POST'])
+@admin_permission_required
+@csrf_protected
+def add_user():
+    #page w/ form for admin to add user
+    if (request.method == "GET"):
+        #initial entry: load add.html
+        return render_template('add_user.html', 
+                               new_user=None, 
+                               user=get_user(),
+                               return_url=request.path,
+                               csrf_token=get_csrf_token())
+    else: #Posted back to page
+            try:
+                #get data from form
+                user_name = request.form['user_name']
+                display_name = request.form['display_name']
+                password = request.form['password']
+                confirm_password = request.form['confirm_password']
+
+
+                #create insance of User
+                new_user = User(-1, user_name, display_name, password)
+                #check for non-matching passwords
+                if (password != confirm_password):
+                    errors = new_user.get_errors()
+                    errors.append ("Passwords do not match.")
+                    raise ExceptionList(errors)
+                #matched passwords-> hashed password to new_user
+
+                errors = new_user.get_errors()
+                if (len(errors) > 0):
+                    raise ExceptionList(errors)
+
+
+                #add to DB
+                Database.add_user(new_user, auth_user= get_user())
+            except ExceptionList as e:
+                return render_template("add_user.html", 
+                                    new_user = new_user, 
+                                    errors = e.error_list,
+                                    return_url=request.path, 
+                                    user = get_user(),
+                                    csrf_token=get_csrf_token())
+            except: # catch all other exceptions
+                abort(500)
+            
+            #on success, redirect to /users
+            return redirect("/users")
+        
 
