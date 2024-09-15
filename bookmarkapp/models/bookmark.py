@@ -2,14 +2,19 @@
     Title: Bookmark Class
     Properties: id, title, url, blurb, description
     Methods: get_errors
+    Description: Represents bookmarks w/ properties.
+                 Has function to validate properties meet desired criteria
 """
 
 class Bookmark:
+    #static variables
     _TITLE_MAX_LENGTH = 70
     _URL_MAX_LENGTH = 1_000
     _BLURB_MAX_LENGTH = 100
     _DESCRIPTION_MAX_LENGTH = 1_000_000
 
+
+    #Constructor for Bookmark
     def __init__(self, id: int = 1, title: str = '', url: str = '', blurb: str = '', description: str = '') -> None:
         self.id = id
         self.title = title
@@ -18,6 +23,7 @@ class Bookmark:
         self.description = description
 
     def get_errors(self) -> list[str]:
+        #returns a list of errors based on invalid values of properties
         errors = []
 
         # Validate title

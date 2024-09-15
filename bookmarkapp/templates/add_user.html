@@ -1,0 +1,42 @@
+{#
+    Title: Add User Form Template
+    Parameters:
+        - new_user: User
+        - csrf_token: str
+        - errors: list[str]
+        - return_url: str
+        - user: User
+#}
+
+{% extends "_base.html" %}
+
+{% block title %}Add Bookmark{% endblock %}
+
+{% block main %}
+    <h1>Add User</h1>
+       <!-- Form to add user -->
+    {% if errors %}
+       <!-- errors from previous attempts-->
+        <ul class="error_list">
+            {% for error in errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    <form action="/users/add" method="post" class="bookmark_form">
+        <input type="hidden" name="csrf_token" value = {{csrf_token}}>
+        <label for="user_name">Username*</label>
+        <input type="text" name="user_name" id="user_name" value="{{new_user.user_name}}"  autofocus />
+        <label for="display_name">Display Name*</label>
+        <input type="text" name="display_name" id="display_name" value="{{new_user.display_name}}" />
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" />
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" name="confirm_password" id="confirm_password"></input>
+        <div class="bookmark_form_buttons">
+            <button type="submit">Submit</button>
+            <a href="/users">Cancel</a>
+        </div>
+    </form>
+{% endblock %}

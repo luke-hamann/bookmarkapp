@@ -1,0 +1,24 @@
+{#
+    Title: Delete Bookmark Form Template
+    Parameters:
+        - user_id: int
+        - return_url: str
+        - user: User
+#}
+
+{% extends "_base.html" %}
+
+{% block title %}Confirm User Deletion{% endblock %}
+
+{% block main %}
+    <h1>Confirm Delete</h1>
+    <form action="/users/delete_user" method="POST" class="delete_form">
+        <p>Are you sure you want to delete "{{ user.display_name }}"?</p>
+            <input type="hidden" name="csrf_token" value="{{csrf_token}}"> 
+            <input type="hidden" name="user_id" value={{user.id}}>
+            <!--Yes button-->
+            <button type="submit" class="bookmark_form_buttons">Yes</button>
+            <!--Cancel Button-->
+            <button type="button" class="bookmark_form_buttons" onclick="window.location.href='/users';">Cancel</button>
+    </form>
+{% endblock %}
