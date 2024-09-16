@@ -250,6 +250,7 @@ def logout():
 # ----------------------------------------------    User Functionalty    ----------------------------------------------
 # USERS LIST                VIEW FUNCTION
 @controller.route("/users", methods=["GET"])
+@login_required
 @admin_permission_required
 @csrf_protected
 def users():
@@ -275,6 +276,7 @@ def users():
 
 # DELETE USER CONFIRMATION      VIEW FUNCTION
 @controller.route("/users/confirm_delete_user", methods = ['POST'])
+@login_required
 @admin_permission_required
 @csrf_protected
 def confirm_delete_user():
@@ -307,6 +309,7 @@ def confirm_delete_user():
 
 # DELETE USER                      ACTION FUNCTION
 @controller.route("/users/delete_user", methods = ['POST'])
+@login_required
 @admin_permission_required
 @csrf_protected
 def delete_user():
@@ -334,6 +337,7 @@ def delete_user():
 
 # ADD USER                          VIEW FUNCTION
 @controller.route("/users/add", methods = ['GET', 'POST'])
+@login_required
 @admin_permission_required
 @csrf_protected
 def add_user():
