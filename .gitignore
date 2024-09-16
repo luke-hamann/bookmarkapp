@@ -8,5 +8,6 @@
 
 __pycache__/
 .venv/
+venv/
 *.db
 config.toml

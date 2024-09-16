@@ -50,6 +50,8 @@ header {
 header nav ul {
     display: flex;
     list-style-type: none;
+    justify-content: flex-start; 
+    gap: 10px; 
 }
 
 header a, header span {
@@ -61,6 +63,25 @@ header button {
     display: block;
     margin: 1rem;
 }
+
+
+#nav_display_name{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem;
+}
+
+        /*nav spacing*/
+
+.left-item {
+    margin-right: auto;
+}
+
+.right-item {
+    margin-left: auto; 
+}
+
 
 /* Main */
 
@@ -87,15 +108,19 @@ footer {
 
 /* Bookmark Table */
 
-.bookmark_table {
+.bookmark_table , .users_table{
     border-collapse: collapse;
     margin-bottom: 1rem;
     width: 100%;
 }
 
-.bookmark_table td, .bookmark_table th {
+.bookmark_table td, .bookmark_table th , .users_table td, .users_table th{
     border: 1px solid;
     padding: 1rem;
+}
+
+.users_table tr td:last-of-type{
+    text-align: center;
 }
 
 @media (max-width: 30rem) {
@@ -136,6 +161,11 @@ footer {
 .bookmark_form_buttons button, .bookmark_form_buttons a {
     display: inline-block;
     padding: 1rem;
+}
+
+.user_table_delete_buttons{
+    display: inline-block;
+    padding: 0.25rem 2rem;
 }
 
 /* Delete Form */

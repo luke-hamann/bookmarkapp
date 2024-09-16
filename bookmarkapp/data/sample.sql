@@ -3,7 +3,7 @@
     Authors: Malachi Harris & Luke Hamann
     Date: 2024-08-31
     Updated: 2024-09-13
-    Purpose: Insert 5 rows of sample data into the Bookmarks table
+    Purpose: Insert sample data into the Bookmarks and Users tables
 */
 
 INSERT INTO bookmarks (title, url, blurb, description)
@@ -55,3 +55,34 @@ VALUES (
 * git merge
 '
 );
+
+
+
+--UN: top_guy
+--PW VerySecur3#
+INSERT INTO users 
+(user_name, display_name, password, privilege)
+VALUES
+('top_guy', 'Chief', 
+'pbkdf2:sha256:260000$ZZB6QlNvCwTd7WNC$0f433ffe8d4bf92b00b25905f2ba61e5ff8ae573771bb537561dfb6d9b95cf16', 
+'admin');
+
+--UN 2nd_user
+--PW LetMeIn
+INSERT INTO users 
+(user_name, display_name, password, privilege)
+VALUES
+('2nd_user', 'Second', 
+'pbkdf2:sha256:260000$xrLiOOoG9y0q6c7U$60f271e2e34c2c513ceb926e717e7de9b86f0be61cd204ddca9e596816aedfcc', 
+'user');
+
+--UN 3rd_user
+--PW Sesame
+INSERT INTO users 
+(user_name, display_name, password, privilege)
+VALUES
+('3rd_user', 'Third', 
+'pbkdf2:sha256:260000$nVAJZhBh2rl4SLXg$e3f12d2805f91ec503d34ab75cb0b1ed363114bd3926bbbc7e8642dfee9bc747', 
+'user');
+
+

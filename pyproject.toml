@@ -6,6 +6,10 @@
 # Purpose: This file provides application packaging information.
 #
 
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
 [project]
 name = "bookmarkapp"
 version = "1.0"
@@ -13,7 +17,8 @@ description = "A web application for managing bookmarks"
 dependencies = [
     "flask",
 ]
-
-[build-system]
-requires = ["flit_core<4"]
-build-backend = "flit_core.buildapi"
+requires-python = ">= 3.12"
+authors = [
+    {name = "Malachi Harris"},
+    {name = "Luke Hamann"}
+]

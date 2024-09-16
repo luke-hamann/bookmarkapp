@@ -1,0 +1,49 @@
+{#
+    Title: Delete Bookmark Form Template
+    Parameters:
+        - users: List[User]
+        - return_url: str
+        - user : user
+#}
+
+{% extends "_base.html" %}
+
+{% block title %}Users{% endblock %}
+{% block main %}
+    <h1>Users</h1>
+    <ul>
+        <li><a href="/users/add">Add user</a></li>
+    </ul>
+    {% if users|length > 0 %}
+        <table class="users_table">
+            <thead>
+                <th>Username</th>
+                <th>Display Name</th>
+                <th>Privilege Level</th>
+                <th>&nbsp;</th>
+            </thead>
+            <tbody>        
+                <!-- populate table from users table of DB -->
+                {% for target_user in users %}
+                <tr>
+                    <td> {{ target_user.user_name }} </td>
+                    <td> {{ target_user.display_name }} </td>
+                    <td> {{ target_user.privilege}} </td>
+                    <td>
+                        <!-- for non admin users, add a delete button-->
+                        {% if target_user.privilege != "admin" %}
+                            <form action="/users/confirm_delete_user" method="POST"> 
+                                <input type="hidden" name="user_id" value="{{target_user.id}}"> 
+                                <input type="hidden" name="csrf_token" value="{{csrf_token}}"> 
+                                <button type="submit" class="user_table_delete_buttons">Delete</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p><i>No users in DB</i></p>
+    {% endif %}
+{% endblock %}
