@@ -1,3 +1,13 @@
+---
+title: Bookmark App
+authors:
+    - Malachi Harris
+    - Luke Hamann
+date: 2024-08-31
+updated: 2024-09-13
+purpose: The README overviews the application and its installation instructions.
+---
+
 # Bookmark App
 
 A web application for managing bookmarks.

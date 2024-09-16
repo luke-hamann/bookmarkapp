@@ -1,5 +1,9 @@
 /*
-    Purpose: Inserts 5 rows of sample data into the Bookmarks table
+    Title: Sample Data
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-08-31
+    Updated: 2024-09-13
+    Purpose: Insert sample data into the Bookmarks and Users tables
 */
 
 INSERT INTO bookmarks (title, url, blurb, description)

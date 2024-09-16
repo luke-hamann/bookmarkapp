@@ -1,3 +1,11 @@
+#
+# Title: .gitignore
+# Authors: Malachi Harris & Luke Hamann
+# Date: 2024-09-01
+# Updated: 2024-09-13
+# Purpose: This file specifies the files and directories that git should ignore.
+#
+
 __pycache__/
 .venv/
 venv/

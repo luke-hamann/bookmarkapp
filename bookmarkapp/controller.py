@@ -1,5 +1,8 @@
 """
     Title: Application Controller
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-08-31
+    Updated: 2024-09-13
     Purpose: Create a Flask blueprint to serve as the controller
 """
 
