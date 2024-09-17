@@ -1,6 +1,11 @@
 {#
-    Title: Delete Bookmark Form Template
+    Title: Delete User Form Template
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-09-15
+    Updated: 2024-09-17
+    Purpose: This file provides a form for confirming the deletion of users.
     Parameters:
+        - csrf_token: str
         - user_id: int
         - return_url: str
         - user: User
@@ -15,13 +20,15 @@
     <h1>Confirm Delete</h1>
     <form action="/users/delete_user" method="POST" class="delete_form">
         <p>Are you sure you want to delete "{{ target_user.display_name }}"?</p>
-            <input type="hidden" name="csrf_token" value="{{csrf_token}}"> 
-            <input type="hidden" name="user_id" value={{target_user.id}}>
-            <!--Yes button-->
-            <button type="submit" class="bookmark_form_buttons">Yes</button>
-            <!--Cancel Button-->
-            <a href="/users">
-                <button type="button">Cancel</button>
-            </a>
+            <input type="hidden" name="csrf_token" value="{{csrf_token}}" /> 
+            <input type="hidden" name="user_id" value="{{target_user.id}}" />
+            <div class="bookmark_form_buttons">
+                <!--Yes button-->
+                <button type="submit">Yes</button>
+                <!--Cancel Button-->
+                <a href="/users">
+                    <button type="button">Cancel</button>
+                </a>
+            </div>
     </form>
 {% endblock %}
