@@ -268,7 +268,10 @@ class Database:
     
     @classmethod
     def delete_user(cls, user_id, auth_user: User):
-        #After authentication, deletes user from the database
+        #After authentication, deletes user from database
+        if (auth_user.privilege != 'admin'):
+            raise ExceptionList(['Authentication is required to delete a user.'])
+
         try: 
             cursor = cls._get_cursor()
             cursor.execute("""
