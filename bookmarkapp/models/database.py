@@ -183,9 +183,6 @@ class Database:
         if (password == ''):
             errors.append('Password is required.')
 
-        if (len(errors) > 0):
-            raise ExceptionList(errors)
-
         cursor = cls._get_cursor()
         cursor.execute("""
                         SELECT id, user_name, display_name, password, privilege
