@@ -2,7 +2,7 @@
     Title: Base Template
     Authors: Malachi Harris & Luke Hamann
     Date: 2024-08-31
-    Updated: 2024-09-13
+    Updated: 2024-09-17
     Purpose: This file provides a base template for all pages of the
              application.
     Blocks: title, main
@@ -24,8 +24,7 @@
     <header>
         <nav>
             <ul>
-             
-                        <li class=><a href="/">Home</a></li>
+                <li><a href="/">Home</a></li>
                 {% if user %}
                     {% if user.privilege == 'admin' %}
                         <li class="left-item">
