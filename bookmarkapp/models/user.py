@@ -2,7 +2,7 @@
     Title: User Class
     Authors: Malachi Harris & Luke Hamann
     Date: 2024-08-31
-    Updated: 2024-09-13
+    Updated: 2024-09-17
     Purpose: This file provides a data class for representing users.
              It has a function to validate that the properties meet the desired criteria.
     Properties: id, username, display_name, password, privilege
@@ -47,11 +47,11 @@ class User:
                 errors.append(f"Username name must be between {User._USER_NAME_MIN_LENGTH} and {User._USER_NAME_MAX_LENGTH:,} characters long.")
             pattern = r'[^a-zA-Z0-9_]'
             if (re.search(pattern, self.user_name)):
-                errors.append("Usernames can only contain letters (a-z, A-Z), numbers (0-9) and underscores(_).")
+                errors.append("Usernames can only contain letters (a-z, A-Z), numbers (0-9), and underscores (_).")
             # If no errors w/ username, check if username is taken
             if (len(errors) == 0):
                 if not (is_user_name_unique(self.user_name)):
-                    errors.append("Username is in use. Please enter a different username")
+                    errors.append("Username is in use. Please enter a different username.")
         #store count to compare after display_name validation
         temp_errors_count = len(errors)
 
@@ -63,12 +63,12 @@ class User:
                 errors.append(f"Display name must be between {User._DISPLAY_NAME_MIN_LENGTH} and {User._DISPLAY_NAME_MAX_LENGTH:,} characters long.")
             pattern = r'[^a-zA-Z0-9_]'
             if (re.search(pattern, self.display_name)):
-                errors.append("Display name can only contain letters (a-z, A-Z), numbers (0-9) and underscores(_).")
+                errors.append("Display name can only contain letters (a-z, A-Z), numbers (0-9), and underscores (_).")
 
             # If no errors w/ display_name, check if display name is taken
             if (len(errors) == temp_errors_count):
                 if not (is_display_name_unique(self.display_name)):
-                    errors.append("Display name is in use. Please enter a different display name")
+                    errors.append("Display name is in use. Please enter a different display name.")
 
         # Validate password
         if (self.password == ''):
@@ -79,7 +79,7 @@ class User:
             # reg ex pattern to check for 1 number 0-9 & 1 special character, only a-z,A-Z,0-9,!@#$%^&*()
             pattern = r'^(?=.*[0-9])(?=.*[!@#$%^&*()])[0-9A-Za-z!@#$%^&*()]+$'
             if (not re.match(pattern, self.password)):
-                errors.append("Password must contain at least 1 number(0-9), and 1 special character(e.g. $, %, &, #, etc).")
+                errors.append("Password must contain at least 1 number (0-9) and 1 special character (e.g. $, %, &, #, etc).")
     
         # Validate privilege
         if (self.privilege not in ['admin', 'user']):
