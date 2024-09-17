@@ -20,7 +20,7 @@ def get_user() -> User:
         return Database.get_user(userId)
 
 def set_user(user: User) -> None:
-    #sets userId in session base on User in argument
+    #sets userId in session based on User in argument
     if (user is None):
         session['userId'] = None
     else:
