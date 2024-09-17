@@ -1,14 +1,14 @@
 """
     Title: User Checks Module
-    Properties: id, username, display_name, password, privilege
-    Methods: is_user_name_unique, is_display_name_unique, _get_cusor
-    Description: Has database read methods to validate new users for unique  diplay and user names 
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-09-15
+    Updated: 2024-09-17
+    Methods: is_user_name_unique, is_display_name_unique, _get_cursor
+    Description: Has database read methods to validate new users for unique display and user names 
 """
+
 import sqlite3
 from bookmarkapp.models import ExceptionList
-
-
-
 
 def _get_cursor() -> sqlite3.Cursor:
     #prepares cursor to connect to database
