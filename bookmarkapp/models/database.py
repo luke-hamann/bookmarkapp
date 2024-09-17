@@ -2,12 +2,13 @@
     Title: Database Class
     Authors: Malachi Harris & Luke Hamann
     Date: 2024-08-31
-    Updated: 2024-09-13
+    Updated: 2024-09-17
     Purpose: This file provides a data class for accessing the database.
+             It has various methods that allow CRUD interactions w/ both the Bookmarks and Users tables.
     Properties: None
     Methods: get_all_bookmarks, get_bookmark, add_bookmark, update_bookmark,
-             delete_bookmark, get_user, authenticate_user
-    Description: Has various methods that allow CRUM interaction w/ database for both bookmarks and users tables
+             delete_bookmark, get_user, authenticate_user,
+             get_all_users_for_table, add_user, delete_user
 """
 
 import sqlite3
@@ -147,9 +148,8 @@ class Database:
             raise ExceptionList(['That bookmark does not exist.'])
 
     @classmethod
-
     def get_user(cls, id: int) -> User:
-        #
+        #Gets user from database
         if id > -1:
             cursor = cls._get_cursor()
             cursor.execute(
@@ -271,6 +271,7 @@ class Database:
     
     @classmethod
     def delete_user(cls, user_id, auth_user: User):
+        #After authentication, deletes user from the database
         try: 
             cursor = cls._get_cursor()
             cursor.execute("""
