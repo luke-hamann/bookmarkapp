@@ -2,7 +2,7 @@
     Title: Application Initializer
     Authors: Malachi Harris & Luke Hamann
     Date: 2024-08-31
-    Updated: 2024-09-13
+    Updated: 2024-09-17
     Purpose: Create and configure the application object for Flask
 """
 
@@ -22,6 +22,7 @@ try:
     with open('config.toml', 'rb') as f:
         app.config.update(tomllib.load(f))
 except FileNotFoundError:
+    print('config.toml not found.')
     exit()
 
 
@@ -39,7 +40,7 @@ def unauthorized(error):
                            csrf_token=get_csrf_token()), 401
 
 @app.errorhandler(403)
-def internal_server_error(error):
+def forbidden(error):
     return render_template("error.html", user=get_user(),
                            title="403 Forbidden",
                            message="You don't have the permission to access the requested resource. It is either read-protected or not readable by the server.",
