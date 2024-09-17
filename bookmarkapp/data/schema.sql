@@ -23,5 +23,5 @@ CREATE TABLE "users" (
 	"display_name"	TEXT NOT NULL UNIQUE,
 	"password"	TEXT NOT NULL,
 	"privilege"	TEXT NOT NULL,
-	PRIMARY KEY("id")
+	PRIMARY KEY("id" AUTOINCREMENT)
 );
