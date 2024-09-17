@@ -1,5 +1,9 @@
 {#
     Title: Add User Form Template
+    Authors: Malachi Harris & Luke Hamann
+    Date: 2024-09-15
+    Updated: 2024-09-17
+    Purpose: This file provides a form for adding users.
     Parameters:
         - new_user: User
         - csrf_token: str
@@ -10,7 +14,7 @@
 
 {% extends "_base.html" %}
 
-{% block title %}Add Bookmark{% endblock %}
+{% block title %}Add User{% endblock %}
 
 {% block main %}
     <h1>Add User</h1>
@@ -25,7 +29,7 @@
     {% endif %}
     
     <form action="/users/add" method="post" class="bookmark_form">
-        <input type="hidden" name="csrf_token" value = {{csrf_token}}>
+        <input type="hidden" name="csrf_token" value="{{csrf_token}}" />
         <label for="user_name">Username*</label>
         <input type="text" name="user_name" id="user_name" value="{{new_user.user_name}}"  autofocus />
         <label for="display_name">Display Name*</label>
@@ -33,7 +37,7 @@
         <label for="password">Password</label>
         <input type="password" name="password" id="password" />
         <label for="confirm_password">Confirm Password</label>
-        <input type="password" name="confirm_password" id="confirm_password"></input>
+        <input type="password" name="confirm_password" id="confirm_password" />
         <div class="bookmark_form_buttons">
             <button type="submit">Submit</button>
             <a href="/users">Cancel</a>
