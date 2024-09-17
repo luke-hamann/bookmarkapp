@@ -2,16 +2,13 @@
     Title: Application Controller
     Authors: Malachi Harris & Luke Hamann
     Date: 2024-08-31
-    Updated: 2024-09-13
+    Updated: 2024-09-17
     Purpose: Create a Flask blueprint to serve as the controller
 """
 
 from functools import wraps
 from flask import abort, Blueprint, redirect, render_template, request, url_for
 from bookmarkapp.models import Bookmark, Database, ExceptionList, User
-from bookmarkapp.models.user_checks import is_user_name_unique, is_display_name_unique
-import sqlite3
-from bookmarkapp.models import Database
 from bookmarkapp.auth import get_user, set_user, get_csrf_token
 
 controller = Blueprint('controller', __name__, url_prefix='/')
@@ -68,7 +65,7 @@ def csrf_protected(old_function):
 
 
 
-# ----------------------------------------------    Bookmark funcitons     ----------------------------------------------
+# ----------------------------------------------    Bookmark functions     ----------------------------------------------
 
 
 # ------------- Bookmark Read Only -----------------
@@ -350,42 +347,40 @@ def add_user():
                                return_url=request.path,
                                csrf_token=get_csrf_token())
     else: #Posted back to page
-            try:
-                #get data from form
-                user_name = request.form['user_name']
-                display_name = request.form['display_name']
-                password = request.form['password']
-                confirm_password = request.form['confirm_password']
+        try:
+            #get data from form
+            user_name = request.form.get('user_name', '').strip()
+            display_name = request.form.get('display_name', '').strip()
+            password = request.form.get('password', '').strip()
+            confirm_password = request.form.get('confirm_password', '').strip()
 
-
-                #create insance of User
-                new_user = User(-1, user_name, display_name, password)
-                #check for non-matching passwords
-                if (password != confirm_password):
-                    errors = new_user.get_errors()
-                    errors.append ("Passwords do not match.")
-                    raise ExceptionList(errors)
-
-                #if errors, raise exception
+            #create insance of User
+            new_user = User(-1, user_name, display_name, password)
+            #check for non-matching passwords
+            if (password != confirm_password):
                 errors = new_user.get_errors()
-                if (len(errors) > 0):
-                    raise ExceptionList(errors)
+                errors.append ("Passwords do not match.")
+                raise ExceptionList(errors)
 
+            #if errors, raise exception
+            errors = new_user.get_errors()
+            if (len(errors) > 0):
+                raise ExceptionList(errors)
 
-                #add to DB
-                Database.add_user(new_user, auth_user= get_user())
+            #add to DB
+            Database.add_user(new_user, auth_user= get_user())
 
-            except ExceptionList as e:
-                return render_template("add_user.html", 
-                                    new_user = new_user, 
-                                    errors = e.error_list,
-                                    return_url=request.path, 
-                                    user = get_user(),
-                                    csrf_token=get_csrf_token())
-            except: # catch all other exceptions
-                abort(500)
-            
-            # On success, redirect to /users
-            return redirect("/users")
+        except ExceptionList as e:
+            return render_template("add_user.html", 
+                                new_user = new_user, 
+                                errors = e.error_list,
+                                return_url=request.path, 
+                                user = get_user(),
+                                csrf_token=get_csrf_token())
+        except: # catch all other exceptions
+            abort(500)
         
+        # On success, redirect to /users
+        return redirect("/users")
+    
 
